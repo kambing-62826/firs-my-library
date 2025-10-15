@@ -1466,6 +1466,7 @@ end
 function TabAPI:createLabel(config)
     local text = config.Text or "Label"
     local textSize = config.TextSize or 14
+    local textColor = config.TextColor or Color3.fromRGB(255, 255, 255)
     local column = config.Column
     local parent = getParent(self, column)
 
@@ -1475,13 +1476,13 @@ function TabAPI:createLabel(config)
     container.Size = UDim2.new(1, 0, 0, 0)
     container.Parent = parent
 
-    --== Text ==--
+    --== Text Label ==--
     local label = Instance.new("TextLabel")
     label.BackgroundTransparency = 1
     label.Size = UDim2.new(1, -10, 0, 0)
     label.Position = UDim2.new(0, 5, 0, 0)
     label.Font = Enum.Font.Gotham
-    label.TextColor3 = CurrentTheme.TextColor or Color3.fromRGB(255, 255, 255)
+    label.TextColor3 = textColor
     label.TextSize = textSize
     label.TextWrapped = true
     label.TextXAlignment = Enum.TextXAlignment.Left
