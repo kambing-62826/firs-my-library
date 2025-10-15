@@ -1607,7 +1607,7 @@ function TabAPI:createColorPicker(config)
     Colorpicker.Name = "Colorpicker"
     Colorpicker.Size = UDim2.new(0, 457, 0, 43)
     Colorpicker.BackgroundColor3 = Color3.fromRGB(64, 68, 75)
-    Colorpicker.BackgroundTransparency = 0.1 -- sedikiiit transparan
+    Colorpicker.BackgroundTransparency = 0.1
     Colorpicker.ClipsDescendants = false
     Colorpicker.Parent = parent
 
@@ -1641,6 +1641,7 @@ function TabAPI:createColorPicker(config)
     Holder.Size = UDim2.new(0, 457, 0, 95)
     Holder.Visible = false
 
+    -- Color Box
     local ColorBox = Instance.new("ImageLabel", Holder)
     ColorBox.Name = "ColorBox"
     ColorBox.BackgroundColor3 = Color3.fromHSV(ColorH, 1, 1)
@@ -1660,7 +1661,10 @@ function TabAPI:createColorPicker(config)
     ColorSelector.AnchorPoint = Vector2.new(0.5, 0.5)
     ColorSelector.Position = UDim2.new(ColorS, 0, 1 - ColorV, 0)
     ColorSelector.ZIndex = 10
+    local ColorSelectorCorner = Instance.new("UICorner", ColorSelector)
+    ColorSelectorCorner.CornerRadius = UDim.new(1, 0) -- lingkaran
 
+    -- Hue Bar
     local HueBar = Instance.new("Frame", Holder)
     HueBar.Name = "HueBar"
     HueBar.Position = UDim2.new(0, 260, 0, 3)
@@ -1686,7 +1690,10 @@ function TabAPI:createColorPicker(config)
     HueSelector.AnchorPoint = Vector2.new(0.5, 0.5)
     HueSelector.Position = UDim2.new(0.5, 0, 1 - ColorH, 0)
     HueSelector.ZIndex = 10
+    local HueSelectorCorner = Instance.new("UICorner", HueSelector)
+    HueSelectorCorner.CornerRadius = UDim.new(1, 0) -- lingkaran
 
+    -- Preview
     local Preview = Instance.new("Frame", Holder)
     Preview.Name = "Preview"
     Preview.BackgroundColor3 = preset
@@ -1695,6 +1702,7 @@ function TabAPI:createColorPicker(config)
     local PreviewCorner = Instance.new("UICorner", Preview)
     PreviewCorner.CornerRadius = UDim.new(0, 4)
 
+    -- Rainbow Toggle
     local ToggleBtn = Instance.new("TextButton", Holder)
     ToggleBtn.Name = "ToggleBtn"
     ToggleBtn.BackgroundTransparency = 1
@@ -1715,7 +1723,7 @@ function TabAPI:createColorPicker(config)
     ToggleCircle.Position = UDim2.new(0, 0, -0.273, 0)
     ToggleCircle.Size = UDim2.new(0, 17, 0, 17)
     local ToggleCircleCorner = Instance.new("UICorner", ToggleCircle)
-    ToggleCircleCorner.CornerRadius = UDim.new(2, 8)
+    ToggleCircleCorner.CornerRadius = UDim.new(1, 0)
 
     -- === FUNCTION UPDATE ===
     local function UpdateColor()
@@ -1726,49 +1734,57 @@ function TabAPI:createColorPicker(config)
         callback(Preview.BackgroundColor3)
     end
 
-    -- === TOGGLE PANEL ===
+    -- Toggle panel
     ToggleButton.MouseButton1Click:Connect(function()
         ColorPickerToggled = not ColorPickerToggled
         Holder.Visible = ColorPickerToggled
     end)
 
-    -- === COLOR DRAG ===
+    -- Color drag (mouse + touch)
+    local function StartColorDrag()
+        if ColorInputConn then ColorInputConn:Disconnect() end
+        ColorInputConn = RunService.RenderStepped:Connect(function()
+            local inputPos = UIS.TouchEnabled and UIS:GetTouchPositions()[1] or Vector2.new(Mouse.X, Mouse.Y)
+            local X = math.clamp(inputPos.X - ColorBox.AbsolutePosition.X, 0, ColorBox.AbsoluteSize.X) / ColorBox.AbsoluteSize.X
+            local Y = math.clamp(inputPos.Y - ColorBox.AbsolutePosition.Y, 0, ColorBox.AbsoluteSize.Y) / ColorBox.AbsoluteSize.Y
+            ColorS = X
+            ColorV = 1 - Y
+            UpdateColor()
+        end)
+    end
     ColorBox.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            if ColorInputConn then ColorInputConn:Disconnect() end
-            ColorInputConn = RunService.RenderStepped:Connect(function()
-                local X = math.clamp(Mouse.X - ColorBox.AbsolutePosition.X, 0, ColorBox.AbsoluteSize.X) / ColorBox.AbsoluteSize.X
-                local Y = math.clamp(Mouse.Y - ColorBox.AbsolutePosition.Y, 0, ColorBox.AbsoluteSize.Y) / ColorBox.AbsoluteSize.Y
-                ColorS = X
-                ColorV = 1 - Y
-                UpdateColor()
-            end)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            StartColorDrag()
         end
     end)
     UIS.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 and ColorInputConn then
+        if ColorInputConn and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
             ColorInputConn:Disconnect()
         end
     end)
 
-    -- === HUE DRAG ===
+    -- Hue drag
+    local function StartHueDrag()
+        if HueInputConn then HueInputConn:Disconnect() end
+        HueInputConn = RunService.RenderStepped:Connect(function()
+            local inputPos = UIS.TouchEnabled and UIS:GetTouchPositions()[1] or Vector2.new(Mouse.X, Mouse.Y)
+            local Y = math.clamp(inputPos.Y - HueBar.AbsolutePosition.Y, 0, HueBar.AbsoluteSize.Y) / HueBar.AbsoluteSize.Y
+            ColorH = 1 - Y
+            UpdateColor()
+        end)
+    end
     HueBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            if HueInputConn then HueInputConn:Disconnect() end
-            HueInputConn = RunService.RenderStepped:Connect(function()
-                local Y = math.clamp(Mouse.Y - HueBar.AbsolutePosition.Y, 0, HueBar.AbsoluteSize.Y) / HueBar.AbsoluteSize.Y
-                ColorH = 1 - Y
-                UpdateColor()
-            end)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            StartHueDrag()
         end
     end)
     UIS.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 and HueInputConn then
+        if HueInputConn and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
             HueInputConn:Disconnect()
         end
     end)
 
-    -- === RAINBOW TOGGLE ===
+    -- Rainbow toggle
     ToggleBtn.MouseButton1Click:Connect(function()
         RainbowColorPicker = not RainbowColorPicker
         if RainbowColorPicker then
