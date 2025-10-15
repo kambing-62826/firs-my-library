@@ -1778,6 +1778,7 @@ function TabAPI:createColorPicker(config)
                     local hue = tick() % 5 / 5
                     local newColor = Color3.fromHSV(hue, 1, 1)
                     BoxColor.BackgroundColor3 = newColor
+                    Color.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
                     pcall(callback, newColor)
                     RunService.RenderStepped:Wait()
                 end
