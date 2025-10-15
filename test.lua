@@ -1601,10 +1601,6 @@ function TabAPI:createColorPicker(config)
     local ColorPickerToggled = false
     local RainbowColorPicker = false
     local ColorInputConn, HueInputConn, RainbowConn = nil, nil, nil
-    local OldToggleColor = Color3.fromRGB(255,255,255)
-    local OldColor = preset
-    local OldColorSelectionPosition = nil
-    local OldHueSelectionPosition = nil
 
     -- HSV state
     local ColorH, ColorS, ColorV = Color3.toHSV(preset)
@@ -1613,20 +1609,20 @@ function TabAPI:createColorPicker(config)
     local Colorpicker = Instance.new("Frame")
     Colorpicker.Name = "Colorpicker"
     Colorpicker.Size = UDim2.new(0, 200, 0, 43)
-    Colorpicker.BackgroundColor3 = Color3.fromRGB(20,20,20)
+    Colorpicker.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     Colorpicker.ClipsDescendants = true
     Colorpicker.Parent = parent
 
     local ColorpickerCorner = Instance.new("UICorner", Colorpicker)
     ColorpickerCorner.CornerRadius = UDim.new(0, 4)
 
-    -- Title
+    -- Title (click area)
     local Title = Instance.new("TextLabel")
     Title.Name = "Title"
     Title.Parent = Colorpicker
     Title.BackgroundTransparency = 1
     Title.Position = UDim2.new(0.05, 0, 0, 0)
-    Title.Size = UDim2.new(0, 140, 0, 42)
+    Title.Size = UDim2.new(0, 180, 0, 42)
     Title.Font = Enum.Font.Gotham
     Title.Text = Text
     Title.TextColor3 = Color3.fromRGB(255,255,255)
@@ -1634,19 +1630,17 @@ function TabAPI:createColorPicker(config)
     Title.TextTransparency = 0.3
     Title.TextXAlignment = Enum.TextXAlignment.Left
 
-    -- big clickable button over title
     local ColorpickerBtn = Instance.new("TextButton")
     ColorpickerBtn.Name = "ColorpickerBtn"
-    ColorpickerBtn.Parent = Title
+    ColorpickerBtn.Parent = Colorpicker
     ColorpickerBtn.BackgroundTransparency = 1
-    ColorpickerBtn.Size = UDim2.new(1,0,1,0)
+    ColorpickerBtn.Size = UDim2.new(1, 0, 0, 42)
     ColorpickerBtn.Text = ""
     ColorpickerBtn.AutoButtonColor = false
 
-    -- circle indicator left of title
+    -- circle indicator
     local Circle = Instance.new("Frame", Title)
     Circle.Name = "Circle"
-    Circle.Active = true
     Circle.AnchorPoint = Vector2.new(0.5, 0.5)
     Circle.BackgroundColor3 = Color3.fromRGB(211,211,211)
     Circle.Position = UDim2.new(-0.1, 0, 0.5, 0)
@@ -1656,7 +1650,6 @@ function TabAPI:createColorPicker(config)
 
     local CircleSmall = Instance.new("Frame", Circle)
     CircleSmall.Name = "CircleSmall"
-    CircleSmall.Active = true
     CircleSmall.AnchorPoint = Vector2.new(0.5, 0.5)
     CircleSmall.BackgroundColor3 = Color3.fromRGB(20,20,20)
     CircleSmall.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -1675,29 +1668,28 @@ function TabAPI:createColorPicker(config)
     local Color = Instance.new("ImageLabel", Holder)
     Color.Name = "Color"
     Color.BackgroundColor3 = preset
-    Color.Position = UDim2.new(0,0,0,3)
-    Color.Size = UDim2.new(0,140,0,80)
+    Color.Position = UDim2.new(0, 3, 0, 3)
+    Color.Size = UDim2.new(0, 150, 0, 80)
     Color.Image = "rbxassetid://4155801252"
     Color.ScaleType = Enum.ScaleType.Stretch
     local ColorCorner = Instance.new("UICorner", Color)
     ColorCorner.CornerRadius = UDim.new(0, 3)
 
-    -- Color selection circle
     local ColorSelection = Instance.new("ImageLabel", Color)
     ColorSelection.Name = "ColorSelection"
     ColorSelection.AnchorPoint = Vector2.new(0.5, 0.5)
     ColorSelection.BackgroundTransparency = 1
-    ColorSelection.Size = UDim2.new(0, 14, 0, 14)
+    ColorSelection.Size = UDim2.new(0, 15, 0, 15)
     ColorSelection.Image = "http://www.roblox.com/asset/?id=4805639000"
     ColorSelection.ScaleType = Enum.ScaleType.Fit
-    ColorSelection.Visible = false
+    ColorSelection.Visible = true
 
     -- Hue slider
     local Hue = Instance.new("Frame", Holder)
     Hue.Name = "Hue"
     Hue.BackgroundColor3 = Color3.fromRGB(255,255,255)
-    Hue.Position = UDim2.new(0,145,0,3)
-    Hue.Size = UDim2.new(0,20,0,80)
+    Hue.Position = UDim2.new(0, 160, 0, 3)
+    Hue.Size = UDim2.new(0, 20, 0, 80)
     local HueCorner = Instance.new("UICorner", Hue)
     HueCorner.CornerRadius = UDim.new(0,3)
 
@@ -1709,24 +1701,23 @@ function TabAPI:createColorPicker(config)
         ColorSequenceKeypoint.new(0.4, Color3.fromRGB(21,255,0)),
         ColorSequenceKeypoint.new(0.6, Color3.fromRGB(0,255,255)),
         ColorSequenceKeypoint.new(0.8, Color3.fromRGB(0,17,255)),
-        ColorSequenceKeypoint.new(0.9, Color3.fromRGB(255,0,251)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,4))
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,251))
     }
 
     local HueSelection = Instance.new("ImageLabel", Hue)
     HueSelection.Name = "HueSelection"
     HueSelection.AnchorPoint = Vector2.new(0.5,0.5)
     HueSelection.BackgroundTransparency = 1
-    HueSelection.Size = UDim2.new(0,14,0,14)
+    HueSelection.Size = UDim2.new(0,15,0,15)
     HueSelection.Image = "http://www.roblox.com/asset/?id=4805639000"
-    HueSelection.Visible = false
+    HueSelection.Visible = true
 
-    -- Toggle rainbow
+    -- Toggle rainbow below color box
     local ToggleLabel = Instance.new("TextLabel", Holder)
     ToggleLabel.Name = "Toggle"
     ToggleLabel.BackgroundTransparency = 1
-    ToggleLabel.Position = UDim2.new(0,0,0,88)
-    ToggleLabel.Size = UDim2.new(0,140,0,20)
+    ToggleLabel.Position = UDim2.new(0, 3, 0, 85)
+    ToggleLabel.Size = UDim2.new(0, 150, 0, 20)
     ToggleLabel.Font = Enum.Font.Gotham
     ToggleLabel.Text = "Rainbow"
     ToggleLabel.TextColor3 = Color3.fromRGB(255,255,255)
@@ -1736,110 +1727,76 @@ function TabAPI:createColorPicker(config)
     local ToggleFrame = Instance.new("Frame", ToggleLabel)
     ToggleFrame.Name = "ToggleFrame"
     ToggleFrame.BackgroundColor3 = Color3.fromRGB(226,227,227)
-    ToggleFrame.Position = UDim2.new(0.75,0,0,0)
-    ToggleFrame.Size = UDim2.new(0,27,0,11)
+    ToggleFrame.Position = UDim2.new(0.75, 0, 0.1, 0)
+    ToggleFrame.Size = UDim2.new(0, 20, 0, 10)
     local ToggleFrameCorner = Instance.new("UICorner", ToggleFrame)
 
     local ToggleCircle = Instance.new("Frame", ToggleFrame)
     ToggleCircle.Name = "ToggleCircle"
     ToggleCircle.BackgroundColor3 = Color3.fromRGB(255,255,255)
-    ToggleCircle.Size = UDim2.new(0,11,0,11)
+    ToggleCircle.Size = UDim2.new(0,10,0,10)
     local ToggleCircleCorner = Instance.new("UICorner", ToggleCircle)
-    ToggleCircleCorner.CornerRadius = UDim.new(2,6)
+    ToggleCircleCorner.CornerRadius = UDim.new(1,5)
 
     local ToggleBtn = Instance.new("TextButton", ToggleLabel)
-    ToggleBtn.Size = UDim2.new(1,0,1,0)
     ToggleBtn.BackgroundTransparency = 1
+    ToggleBtn.Size = UDim2.new(1,0,1,0)
     ToggleBtn.Text = ""
 
     -- Preview box
     local BoxColor = Instance.new("Frame", Holder)
     BoxColor.Name = "BoxColor"
     BoxColor.BackgroundColor3 = preset
-    BoxColor.Position = UDim2.new(0.65,0,0.88,0)
-    BoxColor.Size = UDim2.new(0,30,0,15)
+    BoxColor.Position = UDim2.new(0.8,0,0.85,0)
+    BoxColor.Size = UDim2.new(0,35,0,15)
     local BoxColorCorner = Instance.new("UICorner", BoxColor)
     BoxColorCorner.CornerRadius = UDim.new(0,3)
 
-    -- helper
+    -- Helper
     local function UpdateColorPicker()
         BoxColor.BackgroundColor3 = Color3.fromHSV(ColorH, ColorS, ColorV)
-        Color.BackgroundColor3 = Color3.fromHSV(ColorH,1,1)
+        Color.BackgroundColor3 = Color3.fromHSV(ColorH, 1, 1)
         pcall(callback, BoxColor.BackgroundColor3)
     end
-
-    -- set initial positions
-    do
-        ColorH, ColorS, ColorV = Color3.toHSV(preset)
-        HueSelection.Position = UDim2.new(0.5,0,1-ColorH,0)
-        ColorSelection.Position = UDim2.new(ColorS,0,1-ColorV,0)
-        BoxColor.BackgroundColor3 = preset
-        Color.BackgroundColor3 = preset
-        ColorSelection.Visible = false
-        HueSelection.Visible = false
-        pcall(callback, BoxColor.BackgroundColor3)
-    end
-
-    -- Expand/collapse
-    ColorpickerBtn.MouseButton1Click:Connect(function()
-        ColorSelection.Visible = not ColorSelection.Visible
-        HueSelection.Visible = not HueSelection.Visible
-        Colorpicker:TweenSize(UDim2.new(0,200,0,138), Enum.EasingDirection.Out, Enum.EasingStyle.Quart,.4,true)
-        ColorPickerToggled = not ColorPickerToggled
-    end)
 
     -- Color dragging
     local function DragColor(input)
-        local pos
-        if input.UserInputType == Enum.UserInputType.Touch then
-            pos = input.Position
-        else
-            pos = Mouse.XY
-        end
-        local X = math.clamp(pos.X - Color.AbsolutePosition.X,0,Color.AbsoluteSize.X)/Color.AbsoluteSize.X
-        local Y = math.clamp(pos.Y - Color.AbsolutePosition.Y,0,Color.AbsoluteSize.Y)/Color.AbsoluteSize.Y
-        ColorS = X
-        ColorV = 1-Y
-        ColorSelection.Position = UDim2.new(X,0,Y,0)
+        local posX = math.clamp(input.Position.X - Color.AbsolutePosition.X,0,Color.AbsoluteSize.X)/Color.AbsoluteSize.X
+        local posY = math.clamp(input.Position.Y - Color.AbsolutePosition.Y,0,Color.AbsoluteSize.Y)/Color.AbsoluteSize.Y
+        ColorS = posX
+        ColorV = 1 - posY
+        ColorSelection.Position = UDim2.new(posX,0, posY,0)
         UpdateColorPicker()
     end
 
     Color.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            if ColorInputConn then ColorInputConn:Disconnect() end
-            ColorInputConn = RunService.RenderStepped:Connect(function()
-                DragColor(input)
+            DragColor(input)
+            ColorInputConn = input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    if ColorInputConn then ColorInputConn:Disconnect() end
+                end
             end)
         end
-    end)
-    Color.InputEnded:Connect(function(input)
-        if ColorInputConn then ColorInputConn:Disconnect(); ColorInputConn=nil end
     end)
 
     -- Hue dragging
     local function DragHue(input)
-        local pos
-        if input.UserInputType == Enum.UserInputType.Touch then
-            pos = input.Position
-        else
-            pos = Mouse.XY
-        end
-        local Y = math.clamp(pos.Y - Hue.AbsolutePosition.Y,0,Hue.AbsoluteSize.Y)/Hue.AbsoluteSize.Y
-        ColorH = 1-Y
-        HueSelection.Position = UDim2.new(0.5,0,Y,0)
+        local posY = math.clamp(input.Position.Y - Hue.AbsolutePosition.Y,0,Hue.AbsoluteSize.Y)/Hue.AbsoluteSize.Y
+        ColorH = 1 - posY
+        HueSelection.Position = UDim2.new(0.5,0,posY,0)
         UpdateColorPicker()
     end
 
     Hue.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            if HueInputConn then HueInputConn:Disconnect() end
-            HueInputConn = RunService.RenderStepped:Connect(function()
-                DragHue(input)
+            DragHue(input)
+            HueInputConn = input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    if HueInputConn then HueInputConn:Disconnect() end
+                end
             end)
         end
-    end)
-    Hue.InputEnded:Connect(function(input)
-        if HueInputConn then HueInputConn:Disconnect(); HueInputConn=nil end
     end)
 
     -- Rainbow toggle
@@ -1848,29 +1805,24 @@ function TabAPI:createColorPicker(config)
         if RainbowColorPicker then
             if RainbowConn then RainbowConn:Disconnect() end
             RainbowConn = RunService.RenderStepped:Connect(function()
-                local hue = tick()%5/5
-                BoxColor.BackgroundColor3 = Color3.fromHSV(hue,1,1)
-                Color.BackgroundColor3 = Color3.fromHSV(hue,1,1)
-                pcall(callback, BoxColor.BackgroundColor3)
+                local hue = (tick()%5)/5
+                ColorH, ColorS, ColorV = hue,1,1
+                UpdateColorPicker()
             end)
         else
             if RainbowConn then RainbowConn:Disconnect() end
-            BoxColor.BackgroundColor3 = Color3.fromHSV(ColorH,ColorS,ColorV)
-            Color.BackgroundColor3 = Color3.fromHSV(ColorH,1,1)
         end
     end)
 
     -- expose API
     local api = {}
     function api:SetColor(c)
-        if typeof(c)~="Color3" then return end
+        if typeof(c) ~= "Color3" then return end
         local h,s,v = Color3.toHSV(c)
         ColorH, ColorS, ColorV = h,s,v
-        HueSelection.Position = UDim2.new(0.5,0,1-h,0)
         ColorSelection.Position = UDim2.new(s,0,1-v,0)
-        BoxColor.BackgroundColor3 = c
-        Color.BackgroundColor3 = c
-        pcall(callback,c)
+        HueSelection.Position = UDim2.new(0.5,0,1-h,0)
+        UpdateColorPicker()
     end
     function api:GetColor()
         return BoxColor.BackgroundColor3
