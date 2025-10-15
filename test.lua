@@ -1624,30 +1624,6 @@ function TabAPI:createColorPicker(config)
     Corner.CornerRadius = UDim.new(0, 4)
     Corner.Parent = Frame
 
-    -- Title disesuaikan untuk mengisi tinggi frame
-    local Title = Instance.new("TextLabel")
-    Title.Name = "Title"
-    Title.Text = text
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextTransparency = 0.3
-    Title.Font = Enum.Font.Gotham
-    Title.TextSize = 15
-    Title.Size = UDim2.new(0.6, 0, 1, 0) -- Lebar 60%, tinggi 100%
-    Title.Position = UDim2.new(0.05, 0, 0, 0) -- Margin 5% dari kiri
-    Title.BackgroundTransparency = 1
-    Title.TextXAlignment = Enum.TextXAlignment.Left
-    Title.TextYAlignment = Enum.TextYAlignment.Center -- Perbaikan: Teks di tengah vertikal
-    Title.Parent = Frame
-
-    -- Tombol untuk expand/collapse, ukurannya 100% dari Frame
-    local ColorpickerBtn = Instance.new("TextButton")
-    ColorpickerBtn.Name = "ColorpickerBtn"
-    ColorpickerBtn.Size = UDim2.new(1, 0, 1, 0) -- Lebar dan tinggi 100%
-    ColorpickerBtn.Position = UDim2.new(0, 0, 0, 0)
-    ColorpickerBtn.BackgroundTransparency = 1
-    ColorpickerBtn.Text = ""
-    ColorpickerBtn.Parent = Frame
-
 -- Header container agar BoxColor tidak ikut turun
 local Header = Instance.new("Frame")
 Header.Name = "Header"
