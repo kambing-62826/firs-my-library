@@ -1467,16 +1467,34 @@ function TabAPI:createLabel(config)
     local text = config.Text or "Label"
     local textSize = config.TextSize or 14
     local textColor = config.TextColor or Color3.fromRGB(255, 255, 255)
+    local bgEnabled = config.Background or false
+    local bgColor = config.BackgroundColor or Color3.fromRGB(20, 20, 20)
     local column = config.Column
     local parent = getParent(self, column)
 
     --== Container ==--
     local container = Instance.new("Frame")
-    container.BackgroundTransparency = 1
+    container.BackgroundTransparency = bgEnabled and 0 or 1
+    container.BackgroundColor3 = bgEnabled and bgColor or Color3.new(0, 0, 0)
     container.Size = UDim2.new(1, 0, 0, 0)
+    container.AutomaticSize = Enum.AutomaticSize.Y
     container.Parent = parent
 
-    --== Text Label ==--
+    --== Optional rounded corner ==--
+    if bgEnabled then
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 6)
+        corner.Parent = container
+
+        local padding = Instance.new("UIPadding")
+        padding.PaddingTop = UDim.new(0, 6)
+        padding.PaddingBottom = UDim.new(0, 6)
+        padding.PaddingLeft = UDim.new(0, 8)
+        padding.PaddingRight = UDim.new(0, 8)
+        padding.Parent = container
+    end
+
+    --== Text ==--
     local label = Instance.new("TextLabel")
     label.BackgroundTransparency = 1
     label.Size = UDim2.new(1, -10, 0, 0)
@@ -1491,9 +1509,6 @@ function TabAPI:createLabel(config)
     label.AutomaticSize = Enum.AutomaticSize.Y
     label.Parent = container
 
-    --== Auto height ==--
-    container.AutomaticSize = Enum.AutomaticSize.Y
-
     --== Return API ==--
     local api = {}
     function api:SetText(newText)
@@ -1504,6 +1519,14 @@ function TabAPI:createLabel(config)
     end
     function api:SetColor(color)
         label.TextColor3 = color
+    end
+    function api:SetBackground(enable, color)
+        if enable then
+            container.BackgroundTransparency = 0
+            container.BackgroundColor3 = color or bgColor
+        else
+            container.BackgroundTransparency = 1
+        end
     end
     return api
 end
