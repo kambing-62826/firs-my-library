@@ -1876,18 +1876,18 @@ end
         local relativeX = math.clamp((x - Color.AbsolutePosition.X) / Color.AbsoluteSize.X, 0, 1)
         local relativeY = math.clamp((y - Color.AbsolutePosition.Y) / Color.AbsoluteSize.Y, 0, 1)
         ColorS = relativeX
-        ColorV = 1 - relativeY
+        ColorV = relativeY
         local newColor = Color3.fromHSV(ColorH, ColorS, ColorV)
         BoxColor.BackgroundColor3 = newColor
-        ColorSelection.Position = UDim2.new(relativeX, 0, 1 - relativeY, 0)
+        ColorSelection.Position = UDim2.new(relativeX, 0, relativeY, 0)
         pcall(callback, newColor)
     end
 
     local function UpdateHueFromInput(y)
         local relativeY = math.clamp((y - Hue.AbsolutePosition.Y) / Hue.AbsoluteSize.Y, 0, 1)
-        ColorH = 1 - relativeY
+        ColorH = relativeY
         local newHueColor = Color3.fromHSV(ColorH, 1, 1)
-        HueSelection.Position = UDim2.new(0.48, 0, 1 - relativeY, 0)
+        HueSelection.Position = UDim2.new(0.48, 0, relativeY, 0)
         Color.BackgroundColor3 = newHueColor
         local newColor = Color3.fromHSV(ColorH, ColorS, ColorV)
         BoxColor.BackgroundColor3 = newColor
