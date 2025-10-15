@@ -1593,9 +1593,9 @@ function TabAPI:createColorPicker(config)
 
     local TweenService = game:GetService("TweenService")
     local RunService = game:GetService("RunService")
+    local UIS = game:GetService("UserInputService")
     local Players = game:GetService("Players")
     local Mouse = Players.LocalPlayer:GetMouse()
-    local UIS = game:GetService("UserInputService")
 
     local ColorPickerToggled = false
     local RainbowColorPicker = false
@@ -1606,8 +1606,7 @@ function TabAPI:createColorPicker(config)
     local Colorpicker = Instance.new("Frame")
     Colorpicker.Name = "Colorpicker"
     Colorpicker.Size = UDim2.new(0, 457, 0, 43)
-    Colorpicker.BackgroundColor3 = Color3.fromRGB(64, 68, 75)
-    Colorpicker.BackgroundTransparency = 0.1
+    Colorpicker.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     Colorpicker.ClipsDescendants = false
     Colorpicker.Parent = parent
 
@@ -1657,7 +1656,7 @@ function TabAPI:createColorPicker(config)
     local ColorSelector = Instance.new("Frame", ColorBox)
     ColorSelector.Name = "ColorSelector"
     ColorSelector.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    ColorSelector.Size = UDim2.new(0, 18, 0, 18)
+    ColorSelector.Size = UDim2.new(0, 14, 0, 14) -- lebih kecil
     ColorSelector.AnchorPoint = Vector2.new(0.5, 0.5)
     ColorSelector.Position = UDim2.new(ColorS, 0, 1 - ColorV, 0)
     ColorSelector.ZIndex = 10
@@ -1686,12 +1685,12 @@ function TabAPI:createColorPicker(config)
     local HueSelector = Instance.new("Frame", Holder)
     HueSelector.Name = "HueSelector"
     HueSelector.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    HueSelector.Size = UDim2.new(0, 18, 0, 18)
+    HueSelector.Size = UDim2.new(0, 14, 0, 14) -- lebih kecil
     HueSelector.AnchorPoint = Vector2.new(0.5, 0.5)
     HueSelector.Position = UDim2.new(0.5, 0, 1 - ColorH, 0)
     HueSelector.ZIndex = 10
     local HueSelectorCorner = Instance.new("UICorner", HueSelector)
-    HueSelectorCorner.CornerRadius = UDim.new(1, 0) -- lingkaran
+    HueSelectorCorner.CornerRadius = UDim.new(1, 0)
 
     -- Preview
     local Preview = Instance.new("Frame", Holder)
@@ -1721,7 +1720,7 @@ function TabAPI:createColorPicker(config)
     local ToggleCircle = Instance.new("Frame", ToggleIndicator)
     ToggleCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     ToggleCircle.Position = UDim2.new(0, 0, -0.273, 0)
-    ToggleCircle.Size = UDim2.new(0, 17, 0, 17)
+    ToggleCircle.Size = UDim2.new(0, 14, 0, 14)
     local ToggleCircleCorner = Instance.new("UICorner", ToggleCircle)
     ToggleCircleCorner.CornerRadius = UDim.new(1, 0)
 
@@ -1740,47 +1739,55 @@ function TabAPI:createColorPicker(config)
         Holder.Visible = ColorPickerToggled
     end)
 
-    -- Color drag (mouse + touch)
-    local function StartColorDrag()
-        if ColorInputConn then ColorInputConn:Disconnect() end
-        ColorInputConn = RunService.RenderStepped:Connect(function()
-            local inputPos = UIS.TouchEnabled and UIS:GetTouchPositions()[1] or Vector2.new(Mouse.X, Mouse.Y)
-            local X = math.clamp(inputPos.X - ColorBox.AbsolutePosition.X, 0, ColorBox.AbsoluteSize.X) / ColorBox.AbsoluteSize.X
-            local Y = math.clamp(inputPos.Y - ColorBox.AbsolutePosition.Y, 0, ColorBox.AbsoluteSize.Y) / ColorBox.AbsoluteSize.Y
+    -- Color drag
+    local function StartColorDrag(input)
+        local function Drag()
+            local pos = input.Position
+            local X = math.clamp(pos.X - ColorBox.AbsolutePosition.X, 0, ColorBox.AbsoluteSize.X) / ColorBox.AbsoluteSize.X
+            local Y = math.clamp(pos.Y - ColorBox.AbsolutePosition.Y, 0, ColorBox.AbsoluteSize.Y) / ColorBox.AbsoluteSize.Y
             ColorS = X
             ColorV = 1 - Y
             UpdateColor()
+        end
+        Drag()
+        local conn
+        conn = input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                conn:Disconnect()
+            else
+                Drag()
+            end
         end)
     end
+
     ColorBox.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            StartColorDrag()
-        end
-    end)
-    UIS.InputEnded:Connect(function(input)
-        if ColorInputConn and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
-            ColorInputConn:Disconnect()
+            StartColorDrag(input)
         end
     end)
 
     -- Hue drag
-    local function StartHueDrag()
-        if HueInputConn then HueInputConn:Disconnect() end
-        HueInputConn = RunService.RenderStepped:Connect(function()
-            local inputPos = UIS.TouchEnabled and UIS:GetTouchPositions()[1] or Vector2.new(Mouse.X, Mouse.Y)
-            local Y = math.clamp(inputPos.Y - HueBar.AbsolutePosition.Y, 0, HueBar.AbsoluteSize.Y) / HueBar.AbsoluteSize.Y
+    local function StartHueDrag(input)
+        local function Drag()
+            local pos = input.Position
+            local Y = math.clamp(pos.Y - HueBar.AbsolutePosition.Y, 0, HueBar.AbsoluteSize.Y) / HueBar.AbsoluteSize.Y
             ColorH = 1 - Y
             UpdateColor()
+        end
+        Drag()
+        local conn
+        conn = input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                conn:Disconnect()
+            else
+                Drag()
+            end
         end)
     end
+
     HueBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            StartHueDrag()
-        end
-    end)
-    UIS.InputEnded:Connect(function(input)
-        if HueInputConn and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
-            HueInputConn:Disconnect()
+            StartHueDrag(input)
         end
     end)
 
