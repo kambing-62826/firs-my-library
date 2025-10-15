@@ -1588,6 +1588,7 @@ function TabAPI:createColorPicker(config)
     local RunService = game:GetService("RunService")
     local Players = game:GetService("Players")
     local TweenService = game:GetService("TweenService")
+    local UserInputService = game:GetService("UserInputService")
     local Mouse = Players.LocalPlayer:GetMouse()
 
     local text = config.Name or "Color Picker"
@@ -1604,17 +1605,15 @@ function TabAPI:createColorPicker(config)
     local RainbowColorPicker = false
     local ColorInput, HueInput
 
-    -- Assume getParent exists in the main library
-    local parent = getParent(self, column)
+    local parent = getParent(self, column) or self.Container or self.Holder
     assert(parent, "[ColorPicker] parent (column) is nil!")
 
     local FRAME_HEIGHT_COLLAPSED = 30
     local FRAME_HEIGHT_EXPANDED = 175
     local COLOR_AREA_HEIGHT = 80
-    
+
     local Frame = Instance.new("Frame")
     Frame.Name = "Colorpicker"
-    -- Menggunakan lebar 1 (100% dari parent)
     Frame.Size = UDim2.new(1, 0, 0, FRAME_HEIGHT_COLLAPSED)
     Frame.BackgroundColor3 = Color3.fromRGB(64, 68, 75)
     Frame.ClipsDescendants = true
@@ -1624,57 +1623,51 @@ function TabAPI:createColorPicker(config)
     Corner.CornerRadius = UDim.new(0, 4)
     Corner.Parent = Frame
 
--- Header container agar BoxColor tidak ikut turun
-local Header = Instance.new("Frame")
-Header.Name = "Header"
-Header.Size = UDim2.new(1, 0, 0, FRAME_HEIGHT_COLLAPSED)
-Header.BackgroundTransparency = 1
-Header.Parent = Frame
+    local Header = Instance.new("Frame")
+    Header.Name = "Header"
+    Header.Size = UDim2.new(1, 0, 0, FRAME_HEIGHT_COLLAPSED)
+    Header.BackgroundTransparency = 1
+    Header.Parent = Frame
 
--- Title di dalam header
-local Title = Instance.new("TextLabel")
-Title.Name = "Title"
-Title.Text = text
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextTransparency = 0.3
-Title.Font = Enum.Font.Gotham
-Title.TextSize = 15
-Title.Size = UDim2.new(0.6, 0, 1, 0)
-Title.Position = UDim2.new(0.05, 0, 0, 0)
-Title.BackgroundTransparency = 1
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.TextYAlignment = Enum.TextYAlignment.Center
-Title.Parent = Header
+    local Title = Instance.new("TextLabel")
+    Title.Name = "Title"
+    Title.Text = text
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextTransparency = 0.3
+    Title.Font = Enum.Font.Gotham
+    Title.TextSize = 15
+    Title.Size = UDim2.new(0.6, 0, 1, 0)
+    Title.Position = UDim2.new(0.05, 0, 0, 0)
+    Title.BackgroundTransparency = 1
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.TextYAlignment = Enum.TextYAlignment.Center
+    Title.Parent = Header
 
--- Tombol expand/collapse (klik area)
-local ColorpickerBtn = Instance.new("TextButton")
-ColorpickerBtn.Name = "ColorpickerBtn"
-ColorpickerBtn.Size = UDim2.new(1, 0, 1, 0)
-ColorpickerBtn.Position = UDim2.new(0, 0, 0, 0)
-ColorpickerBtn.BackgroundTransparency = 1
-ColorpickerBtn.Text = ""
-ColorpickerBtn.Parent = Header
+    local ColorpickerBtn = Instance.new("TextButton")
+    ColorpickerBtn.Name = "ColorpickerBtn"
+    ColorpickerBtn.Size = UDim2.new(1, 0, 1, 0)
+    ColorpickerBtn.BackgroundTransparency = 1
+    ColorpickerBtn.Text = ""
+    ColorpickerBtn.Parent = Header
 
--- Box warna tetap di header, tidak ikut turun
-local BoxColor = Instance.new("Frame")
-BoxColor.Name = "BoxColor"
-BoxColor.Size = UDim2.new(0, 30, 0, 18)
-BoxColor.AnchorPoint = Vector2.new(1, 0.5)
-BoxColor.Position = UDim2.new(1, -5, 0.5, 0)
-BoxColor.BackgroundColor3 = preset
-BoxColor.Parent = Header
+    local BoxColor = Instance.new("Frame")
+    BoxColor.Name = "BoxColor"
+    BoxColor.Size = UDim2.new(0, 30, 0, 18)
+    BoxColor.AnchorPoint = Vector2.new(1, 0.5)
+    BoxColor.Position = UDim2.new(1, -5, 0.5, 0)
+    BoxColor.BackgroundColor3 = preset
+    BoxColor.Parent = Header
 
-local BoxColorCorner = Instance.new("UICorner")
-BoxColorCorner.CornerRadius = UDim.new(0, 4)
-BoxColorCorner.Parent = BoxColor
+    local BoxColorCorner = Instance.new("UICorner")
+    BoxColorCorner.CornerRadius = UDim.new(0, 4)
+    BoxColorCorner.Parent = BoxColor
 
-    -- Panel Saturation/Value
     local Color = Instance.new("ImageLabel")
     Color.Name = "Color"
-    Color.Size = UDim2.new(0.8, -10, 0, COLOR_AREA_HEIGHT) -- Lebar relatif, tinggi tetap
-    Color.Position = UDim2.new(0.05, 0, 0, 46) -- 5% margin kiri, 46px di bawah header (30px header + 16px margin)
+    Color.Size = UDim2.new(0.8, -10, 0, COLOR_AREA_HEIGHT)
+    Color.Position = UDim2.new(0.05, 0, 0, 46)
     Color.Image = "rbxassetid://4155801252"
-    Color.BackgroundColor3 = Color3.fromHSV(ColorH, 1, 1) -- Perbaikan: Inisialisasi dengan Hue murni
+    Color.BackgroundColor3 = Color3.fromHSV(ColorH, 1, 1)
     Color.Parent = Frame
     local ColorCorner = Instance.new("UICorner")
     ColorCorner.CornerRadius = UDim.new(0, 3)
@@ -1685,17 +1678,16 @@ BoxColorCorner.Parent = BoxColor
     ColorSelection.Size = UDim2.new(0, 18, 0, 18)
     ColorSelection.AnchorPoint = Vector2.new(0.5, 0.5)
     ColorSelection.BackgroundTransparency = 1
-    ColorSelection.Position = UDim2.new(ColorS, 0, 1-ColorV, 0)
+    ColorSelection.Position = UDim2.new(ColorS, 0, 1 - ColorV, 0)
     ColorSelection.Image = "http://www.roblox.com/asset/?id=4805639000"
     ColorSelection.Visible = false
     ColorSelection.Parent = Color
 
-    -- Hue Slider
     local Hue = Instance.new("ImageLabel")
     Hue.Name = "Hue"
-    Hue.Size = UDim2.new(0.15, -10, 0, COLOR_AREA_HEIGHT) -- Lebar relatif lebih kecil
-    Hue.AnchorPoint = Vector2.new(1, 0) -- AnchorPoint ke kanan-atas
-    Hue.Position = UDim2.new(0.95, 0, 0, 46) -- 5% margin kanan, 46px di bawah header
+    Hue.Size = UDim2.new(0.15, -10, 0, COLOR_AREA_HEIGHT)
+    Hue.AnchorPoint = Vector2.new(1, 0)
+    Hue.Position = UDim2.new(0.95, 0, 0, 46)
     Hue.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Hue.Parent = Frame
     local HueCorner = Instance.new("UICorner")
@@ -1709,8 +1701,7 @@ BoxColorCorner.Parent = BoxColor
         ColorSequenceKeypoint.new(0.4, Color3.fromRGB(21,255,0)),
         ColorSequenceKeypoint.new(0.6, Color3.fromRGB(0,255,255)),
         ColorSequenceKeypoint.new(0.8, Color3.fromRGB(0,17,255)),
-        ColorSequenceKeypoint.new(0.9, Color3.fromRGB(255,0,251)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,4))
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,251))
     }
     HueGradient.Rotation = 270
     HueGradient.Parent = Hue
@@ -1718,14 +1709,14 @@ BoxColorCorner.Parent = BoxColor
     local HueSelection = Instance.new("ImageLabel")
     HueSelection.Name = "HueSelection"
     HueSelection.Size = UDim2.new(0, 18, 0, 18)
-    HueSelection.AnchorPoint = Vector2.new(0.5,0.5)
+    HueSelection.AnchorPoint = Vector2.new(0.5, 0.5)
     HueSelection.BackgroundTransparency = 1
-    HueSelection.Position = UDim2.new(0.48,0,1-ColorH,0)
+    HueSelection.Position = UDim2.new(0.48, 0, 1 - ColorH, 0)
     HueSelection.Image = "http://www.roblox.com/asset/?id=4805639000"
     HueSelection.Visible = false
     HueSelection.Parent = Hue
 
-    -- === Rainbow Toggle (modern switch style, di bawah color picker) ===
+    -- Rainbow Toggle
     local ToggleFrame = Instance.new("Frame")
     ToggleFrame.Name = "RainbowToggleFrame"
     ToggleFrame.Size = UDim2.new(0.9, 0, 0, 22)
@@ -1733,23 +1724,18 @@ BoxColorCorner.Parent = BoxColor
     ToggleFrame.BackgroundTransparency = 1
     ToggleFrame.Parent = Frame
 
-    -- Label teks "Rainbow"
     local ToggleLabel = Instance.new("TextLabel")
-    ToggleLabel.Name = "Label"
+    ToggleLabel.Text = "Rainbow"
     ToggleLabel.Size = UDim2.new(0.7, 0, 1, 0)
-    ToggleLabel.Position = UDim2.new(0, 0, 0, 0)
     ToggleLabel.BackgroundTransparency = 1
     ToggleLabel.Font = Enum.Font.Gotham
-    ToggleLabel.Text = "Rainbow"
     ToggleLabel.TextSize = 14
     ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     ToggleLabel.TextTransparency = 0.3
     ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
     ToggleLabel.Parent = ToggleFrame
 
-    -- Tombol utama (switch area)
     local ToggleButton = Instance.new("TextButton")
-    ToggleButton.Name = "ToggleButton"
     ToggleButton.Size = UDim2.new(0.3, 0, 1, 0)
     ToggleButton.Position = UDim2.new(0.7, 0, 0, 0)
     ToggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
@@ -1761,9 +1747,7 @@ BoxColorCorner.Parent = BoxColor
     ToggleButtonCorner.CornerRadius = UDim.new(1, 0)
     ToggleButtonCorner.Parent = ToggleButton
 
-    -- Lingkaran kecil di dalam toggle
     local ToggleCircle = Instance.new("Frame")
-    ToggleCircle.Name = "Circle"
     ToggleCircle.Size = UDim2.new(0, 18, 0, 18)
     ToggleCircle.Position = UDim2.new(0, 2, 0.5, -9)
     ToggleCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -1773,169 +1757,93 @@ BoxColorCorner.Parent = BoxColor
     CircleCorner.CornerRadius = UDim.new(1, 0)
     CircleCorner.Parent = ToggleCircle
 
-    -- Animasi toggle (modern style)
     local function UpdateToggleState(animated)
         if RainbowColorPicker then
-            -- Aktif: warna merah, circle geser kanan
-            TweenService:Create(ToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-            }):Play()
-            TweenService:Create(ToggleCircle, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Position = UDim2.new(1, -20, 0.5, -9)
-            }):Play()
+            TweenService:Create(ToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 0, 0)}):Play()
+            TweenService:Create(ToggleCircle, TweenInfo.new(0.2), {Position = UDim2.new(1, -20, 0.5, -9)}):Play()
             ToggleLabel.TextTransparency = 0
         else
-            -- Mati: warna abu, circle geser kiri
-            TweenService:Create(ToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-            }):Play()
-            TweenService:Create(ToggleCircle, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Position = UDim2.new(0, 2, 0.5, -9)
-            }):Play()
+            TweenService:Create(ToggleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
+            TweenService:Create(ToggleCircle, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -9)}):Play()
             ToggleLabel.TextTransparency = 0.4
         end
     end
 
-    UpdateToggleState(false)
-
-    -- Klik toggle (ubah status rainbow)
     ToggleButton.MouseButton1Click:Connect(function()
         RainbowColorPicker = not RainbowColorPicker
         UpdateToggleState(true)
-
         if RainbowColorPicker then
-            OldToggleColor = BoxColor.BackgroundColor3
-            OldColor = Color.BackgroundColor3
-            OldColorSelectionPosition = ColorSelection.Position
-            OldHueSelectionPosition = HueSelection.Position
-
             task.spawn(function()
                 while RainbowColorPicker do
                     local hue = tick() % 5 / 5
-                    BoxColor.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
-                    Color.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
-                    ColorSelection.Position = UDim2.new(1, 0, 0, 0)
-                    HueSelection.Position = UDim2.new(0.48, 0, 0, 0)
-                    pcall(callback, BoxColor.BackgroundColor3)
+                    local newColor = Color3.fromHSV(hue, 1, 1)
+                    BoxColor.BackgroundColor3 = newColor
+                    pcall(callback, newColor)
                     RunService.RenderStepped:Wait()
                 end
             end)
-        else
-            BoxColor.BackgroundColor3 = OldToggleColor
-            Color.BackgroundColor3 = OldColor
-            ColorSelection.Position = OldColorSelectionPosition
-            HueSelection.Position = OldHueSelectionPosition
-            ColorH, ColorS, ColorV = Color3.toHSV(OldToggleColor)
         end
     end)
 
-    -- Expand/collapse
     ColorpickerBtn.MouseButton1Click:Connect(function()
         ColorPickerToggled = not ColorPickerToggled
-        if ColorPickerToggled then
-            ColorSelection.Visible = true
-            HueSelection.Visible = true
-            -- Menggunakan lebar 1 (100%) dan ketinggian expanded
-            Frame:TweenSize(UDim2.new(1, 0, 0, FRAME_HEIGHT_EXPANDED),"Out","Quart",0.2,true)
-        else
-            ColorSelection.Visible = false
-            HueSelection.Visible = false
-            -- Menggunakan lebar 1 (100%) dan ketinggian collapsed
-            Frame:TweenSize(UDim2.new(1, 0, 0, FRAME_HEIGHT_COLLAPSED),"Out","Quart",0.2,true)
-        end
+        ColorSelection.Visible = ColorPickerToggled
+        HueSelection.Visible = ColorPickerToggled
+        Frame:TweenSize(
+            UDim2.new(1, 0, 0, ColorPickerToggled and FRAME_HEIGHT_EXPANDED or FRAME_HEIGHT_COLLAPSED),
+            "Out", "Quart", 0.25, true
+        )
     end)
-    
- local UserInputService = game:GetService("UserInputService")
 
+    -- drag color/hue
+    local draggingColor, draggingHue = false, false
     local function UpdateColorFromInput(x, y)
-        local relativeX = math.clamp((x - Color.AbsolutePosition.X) / Color.AbsoluteSize.X, 0, 1)
-        local relativeY = math.clamp((y - Color.AbsolutePosition.Y) / Color.AbsoluteSize.Y, 0, 1)
-        ColorS = relativeX
-        ColorV = relativeY
+        local rx = math.clamp((x - Color.AbsolutePosition.X) / Color.AbsoluteSize.X, 0, 1)
+        local ry = math.clamp((y - Color.AbsolutePosition.Y) / Color.AbsoluteSize.Y, 0, 1)
+        ColorS, ColorV = rx, 1 - ry
         local newColor = Color3.fromHSV(ColorH, ColorS, ColorV)
         BoxColor.BackgroundColor3 = newColor
-        ColorSelection.Position = UDim2.new(relativeX, 0, relativeY, 0)
+        ColorSelection.Position = UDim2.new(rx, 0, 1 - ColorV, 0)
         pcall(callback, newColor)
     end
 
     local function UpdateHueFromInput(y)
-        local relativeY = math.clamp((y - Hue.AbsolutePosition.Y) / Hue.AbsoluteSize.Y, 0, 1)
-        ColorH = relativeY
-        local newHueColor = Color3.fromHSV(ColorH, 1, 1)
-        HueSelection.Position = UDim2.new(0.48, 0, relativeY, 0)
-        Color.BackgroundColor3 = newHueColor
+        local ry = math.clamp((y - Hue.AbsolutePosition.Y) / Hue.AbsoluteSize.Y, 0, 1)
+        ColorH = 1 - ry
+        HueSelection.Position = UDim2.new(0.48, 0, 1 - ry, 0)
         local newColor = Color3.fromHSV(ColorH, ColorS, ColorV)
+        Color.BackgroundColor3 = Color3.fromHSV(ColorH, 1, 1)
         BoxColor.BackgroundColor3 = newColor
         pcall(callback, newColor)
     end
 
-    -- Event handlers
-    local draggingColor = false
-    local draggingHue = false
-
-    local function StartColorDrag(input)
-        draggingColor = true
-        UpdateColorFromInput(input.Position.X, input.Position.Y)
-    end
-
-    local function StartHueDrag(input)
-        draggingHue = true
-        UpdateHueFromInput(input.Position.Y)
-    end
-
-    local function StopDrag()
-        draggingColor = false
-        draggingHue = false
-    end
-
-    -- Mouse and touch handling
-    Color.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or
-           input.UserInputType == Enum.UserInputType.Touch then
-            StartColorDrag(input)
+    Color.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+            draggingColor = true
+            UpdateColorFromInput(i.Position.X, i.Position.Y)
+        end
+    end)
+    Hue.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+            draggingHue = true
+            UpdateHueFromInput(i.Position.Y)
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(i)
+        if draggingColor then
+            UpdateColorFromInput(i.Position.X, i.Position.Y)
+        elseif draggingHue then
+            UpdateHueFromInput(i.Position.Y)
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+            draggingColor = false
+            draggingHue = false
         end
     end)
 
-    Hue.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or
-           input.UserInputType == Enum.UserInputType.Touch then
-            StartHueDrag(input)
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if draggingColor and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            UpdateColorFromInput(input.Position.X, input.Position.Y)
-        elseif draggingHue and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            UpdateHueFromInput(input.Position.Y)
-        end
-    end)
-
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or
-           input.UserInputType == Enum.UserInputType.Touch then
-            StopDrag()
-        end
-    end)
-    
-        -- Expand/collapse
-    ColorpickerBtn.MouseButton1Click:Connect(function()
-        ColorPickerToggled = not ColorPickerToggled
-        if ColorPickerToggled then
-            ColorSelection.Visible = true
-            HueSelection.Visible = true
-            -- Menggunakan lebar 1 (100%) dan ketinggian expanded
-            Frame:TweenSize(UDim2.new(1, 0, 0, FRAME_HEIGHT_EXPANDED),"Out","Quart",0.2,true)
-        else
-            ColorSelection.Visible = false
-            HueSelection.Visible = false
-            -- Menggunakan lebar 1 (100%) dan ketinggian collapsed
-            Frame:TweenSize(UDim2.new(1, 0, 0, FRAME_HEIGHT_COLLAPSED),"Out","Quart",0.2,true)
-        end
-    end)
-end
-
-   return {
+    return {
         SetColor = function(newColor)
             if typeof(newColor) == "Color3" then
                 BoxColor.BackgroundColor3 = newColor
@@ -1946,11 +1854,9 @@ end
                 pcall(callback, newColor)
             end
         end,
-
         GetColor = function()
             return BoxColor.BackgroundColor3
         end,
-
         SetRainbow = function(state)
             RainbowColorPicker = state
             UpdateToggleState(true)
