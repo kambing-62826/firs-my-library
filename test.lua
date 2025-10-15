@@ -1935,6 +1935,29 @@ BoxColorCorner.Parent = BoxColor
     end)
 end
 
+   return {
+        SetColor = function(newColor)
+            if typeof(newColor) == "Color3" then
+                BoxColor.BackgroundColor3 = newColor
+                Color.BackgroundColor3 = newColor
+                ColorH, ColorS, ColorV = Color3.toHSV(newColor)
+                ColorSelection.Position = UDim2.new(ColorS, 0, 1 - ColorV, 0)
+                HueSelection.Position = UDim2.new(0.48, 0, 1 - ColorH, 0)
+                pcall(callback, newColor)
+            end
+        end,
+
+        GetColor = function()
+            return BoxColor.BackgroundColor3
+        end,
+
+        SetRainbow = function(state)
+            RainbowColorPicker = state
+            UpdateToggleState(true)
+        end
+    }
+end
+
     -- createKeybind
     function TabAPI:createKeybind(config)
         local name = config.Name or "Keybind"
