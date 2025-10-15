@@ -1609,7 +1609,7 @@ function TabAPI:createColorPicker(config)
     assert(parent, "[ColorPicker] parent (column) is nil!")
 
     local FRAME_HEIGHT_COLLAPSED = 30
-    local FRAME_HEIGHT_EXPANDED = 138
+    local FRAME_HEIGHT_EXPANDED = 170
     local COLOR_AREA_HEIGHT = 80
     
     local Frame = Instance.new("Frame")
@@ -1717,27 +1717,34 @@ function TabAPI:createColorPicker(config)
     HueSelection.Visible = false
     HueSelection.Parent = Hue
 
-    -- Toggle rainbow (Disederhanakan dan diposisikan di header)
-    -- Menghapus ToggleFrame dan ToggleCircle yang kompleks
+    -- === Rainbow Toggle (dipindahkan ke bawah Color & Hue) ===
     local Toggle = Instance.new("TextButton")
     Toggle.Name = "RainbowToggle"
     Toggle.Text = "RAINBOW"
     Toggle.Font = Enum.Font.Gotham
     Toggle.TextSize = 13
-    Toggle.BackgroundTransparency = 1
-    Toggle.TextXAlignment = Enum.TextXAlignment.Right
-    Toggle.TextYAlignment = Enum.TextYAlignment.Center -- Added
-    Toggle.Size = UDim2.new(0.3, 0, 1, 0)
-    Toggle.Position = UDim2.new(0.65, -35, 0, 0) -- Diposisikan di sebelah kiri BoxColor
+    Toggle.BackgroundTransparency = 0
+    Toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Toggle.TextTransparency = 0.4
+    Toggle.AutoButtonColor = false
+    Toggle.Size = UDim2.new(0.9, 0, 0, 22)
+    Toggle.Position = UDim2.new(0.05, 0, 0, 46 + COLOR_AREA_HEIGHT + 8) -- di bawah color picker area
     Toggle.Parent = Frame
-    
+
+    local ToggleCorner = Instance.new("UICorner")
+    ToggleCorner.CornerRadius = UDim.new(0, 4)
+    ToggleCorner.Parent = Toggle
+
     local function UpdateToggleState()
         if RainbowColorPicker then
-            Toggle.TextColor3 = Color3.fromRGB(255, 0, 0) -- Merah untuk ON/Aktif
+            Toggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+            Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
             Toggle.TextTransparency = 0
         else
+            Toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
             Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Toggle.TextTransparency = 0.4 -- Pudar untuk OFF/Tidak Aktif
+            Toggle.TextTransparency = 0.4
         end
     end
     
