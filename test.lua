@@ -1868,8 +1868,7 @@ BoxColorCorner.Parent = BoxColor
             Frame:TweenSize(UDim2.new(1, 0, 0, FRAME_HEIGHT_COLLAPSED),"Out","Quart",0.2,true)
         end
     end)
-end
-
+    
  local UserInputService = game:GetService("UserInputService")
 
     local function UpdateColorFromInput(x, y)
