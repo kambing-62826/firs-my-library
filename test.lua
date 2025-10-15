@@ -1609,7 +1609,7 @@ function TabAPI:createColorPicker(config)
 
     local Frame = Instance.new("Frame")
     Frame.Name = "Colorpicker"
-    Frame.Size = UDim2.new(3, 0, 0, 30)
+    Frame.Size = UDim2.new(1, 0, 0, 30)
     Frame.BackgroundColor3 = Color3.fromRGB(64, 68, 75)
     Frame.ClipsDescendants = true
     Frame.Parent = parent
@@ -1709,7 +1709,7 @@ function TabAPI:createColorPicker(config)
     Toggle.Text = "Rainbow"
     Toggle.Font = Enum.Font.Gotham
     Toggle.TextSize = 15
-    Toggle.TextColor3 = Color3.fromRGB(255,255,255)
+    Toggle.TextColor3 = Color3.fromRGB(255,0,0)
     Toggle.BackgroundTransparency = 1
     Toggle.Position = UDim2.new(1, 0, 0, 0)
     Toggle.Size = UDim2.new(0, 137, 0, 38)
