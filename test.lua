@@ -1414,7 +1414,6 @@ end
 
 -- createTextbox
 function TabAPI:createTextbox(config)
-    local labelText = config.Name or "Textbox"
     local placeholder = config.Placeholder or "Enter text..."
     local defaultText = config.Default or ""
     local callback = config.Callback or function() end
@@ -1423,30 +1422,18 @@ function TabAPI:createTextbox(config)
 
     --== Container ==--
     local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, 0, 0, 40)
+    container.Size = UDim2.new(0, 200, 0, 30) -- fixed width: 200px
     container.BackgroundTransparency = 1
     container.Parent = parent
 
-    --== Label ==--
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -10, 0, 16)
-    label.Position = UDim2.new(0, 5, 0, 0)
-    label.BackgroundTransparency = 1
-    label.Text = labelText
-    label.TextColor3 = CurrentTheme.TextColor or Color3.fromRGB(255, 255, 255)
-    label.TextSize = 14
-    label.Font = Enum.Font.GothamBold
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = container
-
     --== Textbox ==--
     local box = Instance.new("TextBox")
-    box.Size = UDim2.new(1, -10, 0, 22)
-    box.Position = UDim2.new(0, 5, 0, 18)
-    box.BackgroundColor3 = CurrentTheme.ButtonBG or Color3.fromRGB(45, 45, 45)
-    box.TextColor3 = CurrentTheme.TextColor or Color3.fromRGB(255, 255, 255)
+    box.Size = UDim2.new(1, 0, 1, 0)
+    box.Position = UDim2.new(0, 0, 0, 0)
+    box.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- pure black
+    box.TextColor3 = Color3.fromRGB(255, 255, 255)
     box.PlaceholderText = placeholder
-    box.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+    box.PlaceholderColor3 = Color3.fromRGB(130, 130, 130)
     box.Text = defaultText
     box.TextSize = 14
     box.Font = Enum.Font.Gotham
@@ -1454,49 +1441,17 @@ function TabAPI:createTextbox(config)
     box.ClipsDescendants = true
     box.Parent = container
 
-    --== Stroke & Corner ==--
+    --== Corner ==--
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 5)
     corner.Parent = box
 
-    local stroke = Instance.new("UIStroke")
-    stroke.Thickness = 1
-    stroke.Color = CurrentTheme.AccentDark or Color3.fromRGB(100, 100, 100)
-    stroke.Parent = box
-
     --== Behavior ==--
     box.FocusLost:Connect(function(enterPressed)
         callback(box.Text)
-        if enterPressed then
-            -- optional visual flash
-            box.BackgroundColor3 = CurrentTheme.Accent or Color3.fromRGB(255, 0, 0)
-            task.wait(0.1)
-            box.BackgroundColor3 = CurrentTheme.ButtonBG or Color3.fromRGB(45, 45, 45)
-        end
     end)
 
-    box.Focused:Connect(function()
-        stroke.Color = CurrentTheme.Accent or Color3.fromRGB(255, 0, 0)
-    end)
-
-    box.FocusLost:Connect(function()
-        stroke.Color = CurrentTheme.AccentDark or Color3.fromRGB(100, 100, 100)
-    end)
-
-    --== Hover Effect ==--
-    local UIS = game:GetService("UserInputService")
-    box.MouseEnter:Connect(function()
-        if not box:IsFocused() then
-            stroke.Color = CurrentTheme.Accent or Color3.fromRGB(255, 0, 0)
-        end
-    end)
-    box.MouseLeave:Connect(function()
-        if not box:IsFocused() then
-            stroke.Color = CurrentTheme.AccentDark or Color3.fromRGB(100, 100, 100)
-        end
-    end)
-
-    --== Return ==--
+    --== Return API ==--
     local api = {}
     function api:SetText(text)
         box.Text = text
