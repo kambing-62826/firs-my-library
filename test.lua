@@ -15,27 +15,28 @@ end)
 local CurrentTheme = {}
 
 local Themes = {
-    ['Dark Red'] = {
-        MainBG = Color3.fromRGB(25, 25, 25),
-        HeaderBG = Color3.fromRGB(35, 35, 35),
-        Accent = Color3.fromRGB(255, 0, 0),
-        AccentDark = Color3.fromRGB(180, 0, 0),
-        ButtonBG = Color3.fromRGB(60, 60, 60),
-        ButtonHover = Color3.fromRGB(80, 80, 80),
+    
+        ['Sunset Ember'] = {
+        MainBG = Color3.fromRGB(30, 20, 15),
+        HeaderBG = Color3.fromRGB(45, 25, 15),
+        Accent = Color3.fromRGB(255, 100, 0),
+        AccentDark = Color3.fromRGB(200, 60, 0),
+        ButtonBG = Color3.fromRGB(60, 40, 30),
+        ButtonHover = Color3.fromRGB(80, 50, 35),
         ToggleOffKnob = Color3.fromRGB(0, 0, 0),
-        ToggleGlow = Color3.fromRGB(255, 50, 50),
-        TabBGInactive = Color3.fromRGB(60, 60, 60),
-        DropdownBG = Color3.fromRGB(50, 50, 50),
-        DropdownListBG = Color3.fromRGB(45, 45, 45),
-        DropdownOptionBG = Color3.fromRGB(55, 55, 55),
-        DropdownOptionActive = Color3.fromRGB(90, 30, 30),
-        TextColor = Color3.fromRGB(255, 255, 255),
-        TextColorSecondary = Color3.fromRGB(200, 200, 200),
-        GradientStart = Color3.fromRGB(180, 0, 0),
-        GradientEnd = Color3.fromRGB(90, 0, 0),
-        KeybindGlow = Color3.fromRGB(0, 150, 255),
-        StrokeDark = Color3.fromRGB(20, 20, 20),
-        StrokeAccent = Color3.fromRGB(120, 0, 0),
+        ToggleGlow = Color3.fromRGB(255, 130, 50),
+        TabBGInactive = Color3.fromRGB(60, 45, 35),
+        DropdownBG = Color3.fromRGB(50, 35, 25),
+        DropdownListBG = Color3.fromRGB(40, 30, 20),
+        DropdownOptionBG = Color3.fromRGB(55, 40, 30),
+        DropdownOptionActive = Color3.fromRGB(90, 50, 35),
+        TextColor = Color3.fromRGB(255, 220, 200),
+        TextColorSecondary = Color3.fromRGB(210, 180, 160),
+        GradientStart = Color3.fromRGB(255, 140, 60),
+        GradientEnd = Color3.fromRGB(150, 60, 20),
+        KeybindGlow = Color3.fromRGB(255, 160, 100),
+        StrokeDark = Color3.fromRGB(20, 10, 5),
+        StrokeAccent = Color3.fromRGB(180, 70, 30),
     },
 
     ['Blue Steel'] = {
@@ -153,27 +154,27 @@ local Themes = {
         StrokeAccent = Color3.fromRGB(160, 160, 160),
     },
 
-    ['Sunset Ember'] = {
-        MainBG = Color3.fromRGB(30, 20, 15),
-        HeaderBG = Color3.fromRGB(45, 25, 15),
-        Accent = Color3.fromRGB(255, 100, 0),
-        AccentDark = Color3.fromRGB(200, 60, 0),
-        ButtonBG = Color3.fromRGB(60, 40, 30),
-        ButtonHover = Color3.fromRGB(80, 50, 35),
+    ['Dark Red'] = {
+        MainBG = Color3.fromRGB(25, 25, 25),
+        HeaderBG = Color3.fromRGB(35, 35, 35),
+        Accent = Color3.fromRGB(255, 0, 0),
+        AccentDark = Color3.fromRGB(180, 0, 0),
+        ButtonBG = Color3.fromRGB(60, 60, 60),
+        ButtonHover = Color3.fromRGB(80, 80, 80),
         ToggleOffKnob = Color3.fromRGB(0, 0, 0),
-        ToggleGlow = Color3.fromRGB(255, 130, 50),
-        TabBGInactive = Color3.fromRGB(60, 45, 35),
-        DropdownBG = Color3.fromRGB(50, 35, 25),
-        DropdownListBG = Color3.fromRGB(40, 30, 20),
-        DropdownOptionBG = Color3.fromRGB(55, 40, 30),
-        DropdownOptionActive = Color3.fromRGB(90, 50, 35),
-        TextColor = Color3.fromRGB(255, 220, 200),
-        TextColorSecondary = Color3.fromRGB(210, 180, 160),
-        GradientStart = Color3.fromRGB(255, 140, 60),
-        GradientEnd = Color3.fromRGB(150, 60, 20),
-        KeybindGlow = Color3.fromRGB(255, 160, 100),
-        StrokeDark = Color3.fromRGB(20, 10, 5),
-        StrokeAccent = Color3.fromRGB(180, 70, 30),
+        ToggleGlow = Color3.fromRGB(255, 50, 50),
+        TabBGInactive = Color3.fromRGB(60, 60, 60),
+        DropdownBG = Color3.fromRGB(50, 50, 50),
+        DropdownListBG = Color3.fromRGB(45, 45, 45),
+        DropdownOptionBG = Color3.fromRGB(55, 55, 55),
+        DropdownOptionActive = Color3.fromRGB(90, 30, 30),
+        TextColor = Color3.fromRGB(255, 255, 255),
+        TextColorSecondary = Color3.fromRGB(200, 200, 200),
+        GradientStart = Color3.fromRGB(180, 0, 0),
+        GradientEnd = Color3.fromRGB(90, 0, 0),
+        KeybindGlow = Color3.fromRGB(0, 150, 255),
+        StrokeDark = Color3.fromRGB(20, 20, 20),
+        StrokeAccent = Color3.fromRGB(120, 0, 0),
     },
 }
 
@@ -1526,6 +1527,57 @@ function TabAPI:createLabel(config)
             container.BackgroundColor3 = color or bgColor
         else
             container.BackgroundTransparency = 1
+        end
+    end
+    return api
+end
+
+-- createline
+function TabAPI:createLine(config)
+    local orientation = config.Orientation or "Horizontal" -- "Horizontal" or "Vertical"
+    local color = config.Color or Color3.fromRGB(100, 100, 100)
+    local thickness = config.Thickness or 1
+    local length = config.Length or 1 -- kalau Horizontal: 1 = full width, kalau Vertical: tinggi relatif
+    local column = config.Column
+    local parent = getParent(self, column)
+
+    --== Container ==--
+    local container = Instance.new("Frame")
+    container.BackgroundTransparency = 1
+    container.Size = UDim2.new(1, 0, 0, 10)
+    container.Parent = parent
+
+    --== Line ==--
+    local line = Instance.new("Frame")
+    line.BackgroundColor3 = color
+    line.BorderSizePixel = 0
+    line.Parent = container
+
+    if orientation:lower() == "horizontal" then
+        line.AnchorPoint = Vector2.new(0.5, 0.5)
+        line.Position = UDim2.new(0.5, 0, 0.5, 0)
+        line.Size = UDim2.new(length, 0, 0, thickness)
+    else
+        line.AnchorPoint = Vector2.new(0.5, 0.5)
+        line.Position = UDim2.new(0.5, 0, 0.5, 0)
+        line.Size = UDim2.new(0, thickness, length, 0)
+    end
+
+    --== Rounded edges (optional aesthetic) ==--
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, thickness / 2)
+    corner.Parent = line
+
+    --== Return API ==--
+    local api = {}
+    function api:SetColor(newColor)
+        line.BackgroundColor3 = newColor
+    end
+    function api:SetThickness(newThickness)
+        if orientation:lower() == "horizontal" then
+            line.Size = UDim2.new(length, 0, 0, newThickness)
+        else
+            line.Size = UDim2.new(0, newThickness, length, 0)
         end
     end
     return api
