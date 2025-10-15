@@ -1853,6 +1853,23 @@ BoxColorCorner.Parent = BoxColor
         end
     end)
 
+    -- Expand/collapse
+    ColorpickerBtn.MouseButton1Click:Connect(function()
+        ColorPickerToggled = not ColorPickerToggled
+        if ColorPickerToggled then
+            ColorSelection.Visible = true
+            HueSelection.Visible = true
+            -- Menggunakan lebar 1 (100%) dan ketinggian expanded
+            Frame:TweenSize(UDim2.new(1, 0, 0, FRAME_HEIGHT_EXPANDED),"Out","Quart",0.2,true)
+        else
+            ColorSelection.Visible = false
+            HueSelection.Visible = false
+            -- Menggunakan lebar 1 (100%) dan ketinggian collapsed
+            Frame:TweenSize(UDim2.new(1, 0, 0, FRAME_HEIGHT_COLLAPSED),"Out","Quart",0.2,true)
+        end
+    end)
+end
+
  local UserInputService = game:GetService("UserInputService")
 
     local function UpdateColorFromInput(x, y)
@@ -1925,23 +1942,6 @@ BoxColorCorner.Parent = BoxColor
             StopDrag()
         end
     end)
-
-    -- Expand/collapse
-    ColorpickerBtn.MouseButton1Click:Connect(function()
-        ColorPickerToggled = not ColorPickerToggled
-        if ColorPickerToggled then
-            ColorSelection.Visible = true
-            HueSelection.Visible = true
-            -- Menggunakan lebar 1 (100%) dan ketinggian expanded
-            Frame:TweenSize(UDim2.new(1, 0, 0, FRAME_HEIGHT_EXPANDED),"Out","Quart",0.2,true)
-        else
-            ColorSelection.Visible = false
-            HueSelection.Visible = false
-            -- Menggunakan lebar 1 (100%) dan ketinggian collapsed
-            Frame:TweenSize(UDim2.new(1, 0, 0, FRAME_HEIGHT_COLLAPSED),"Out","Quart",0.2,true)
-        end
-    end)
-end
 
     -- createKeybind
     function TabAPI:createKeybind(config)
