@@ -1584,233 +1584,233 @@ function TabAPI:createLine(config)
 end
 
 -- createcolorpicker
-function TabAPI:createColorPicker(config)
-    local text = config.Name or "Color Picker"
-    local preset = config.Default or Color3.fromRGB(255, 0, 0)
+function TabAPI:createColorpicker(config)
+    local name = config.Name or "Color Picker"
+    local defaultColor = config.Default or Color3.new(1, 1, 1)
     local callback = config.Callback or function() end
-    local column = config.Column
-
-    local ColorPickerToggled = false
-    local OldToggleColor = preset
-    local OldColor = preset
-    local OldColorSelectionPosition
-    local OldHueSelectionPosition
-    local ColorH, ColorS, ColorV = 1, 1, 1
-    local RainbowColorPicker = false
-    local ColorInput, HueInput
+    local column = config.Column or 1
 
     local parent = getParent(self, column)
 
-    local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(1, 0, 0, 43)
-    Frame.BackgroundColor3 = Color3.fromRGB(64, 68, 75)
-    Frame.ClipsDescendants = true
-    Frame.Parent = parent
-    Frame.Name = "Colorpicker"
+    -- === STATE VARIABLES ===
+    local h, s, v = Color3.toHSV(defaultColor)
+    local pickerOpen = false
+    local dragging = nil -- Can be "sv" or "hue"
 
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 4)
-    Corner.Parent = Frame
+    -- === MAIN CONTAINER ===
+    local container = Instance.new("Frame")
+    container.Name = "ColorpickerContainer"
+    container.Size = UDim2.new(1, 0, 0, 40)
+    container.BackgroundTransparency = 1
+    container.ClipsDescendants = false -- Allow picker to pop out
+    container.Parent = parent
 
-    local Title = Instance.new("TextLabel")
-    Title.Text = text
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextTransparency = 0.3
-    Title.Font = Enum.Font.Gotham
-    Title.TextSize = 15
-    Title.Size = UDim2.new(0, 113, 0, 42)
-    Title.Position = UDim2.new(0.08, 0, 0, 0)
-    Title.BackgroundTransparency = 1
-    Title.TextXAlignment = Enum.TextXAlignment.Left
-    Title.Parent = Frame
+    -- === HEADER (Always Visible Button) ===
+    local headerBtn = Instance.new("TextButton")
+    headerBtn.Name = "HeaderButton"
+    headerBtn.Size = UDim2.new(1, 0, 1, 0)
+    headerBtn.BackgroundColor3 = CurrentTheme.ButtonBG
+    headerBtn.Text = ""
+    headerBtn.AutoButtonColor = false
+    headerBtn.Parent = container
+    Instance.new("UICorner", headerBtn).CornerRadius = UDim.new(0, 6)
 
-    local ColorpickerBtn = Instance.new("TextButton")
-    ColorpickerBtn.Size = UDim2.new(1, 0, 0, 42)
-    ColorpickerBtn.Position = UDim2.new(0, 0, 0, 0)
-    ColorpickerBtn.BackgroundTransparency = 1
-    ColorpickerBtn.Text = ""
-    ColorpickerBtn.Parent = Frame
+    local headerLayout = Instance.new("UIListLayout", headerBtn)
+    headerLayout.FillDirection = Enum.FillDirection.Horizontal
+    headerLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    headerLayout.Padding = UDim.new(0, 8)
 
-    local BoxColor = Instance.new("Frame")
-    BoxColor.Size = UDim2.new(0, 35, 0, 19)
-    BoxColor.Position = UDim2.new(0.7, 0, 0.3, 0)
-    BoxColor.BackgroundColor3 = preset
-    BoxColor.Parent = Frame
+    local headerPadding = Instance.new("UIPadding", headerBtn)
+    headerPadding.PaddingLeft = UDim.new(0, 10)
 
-    local BoxColorCorner = Instance.new("UICorner")
-    BoxColorCorner.CornerRadius = UDim.new(0, 4)
-    BoxColorCorner.Parent = BoxColor
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -45, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 14
+    label.TextColor3 = CurrentTheme.TextColorSecondary
+    label.Text = name
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = headerBtn
 
-    -- Frame untuk color area
-    local Color = Instance.new("ImageLabel")
-    Color.Size = UDim2.new(0, 246, 0, 80)
-    Color.Position = UDim2.new(0, -23, 0, 46)
-    Color.Image = "rbxassetid://4155801252"
-    Color.BackgroundColor3 = preset
-    Color.Parent = Frame
+    local colorPreview = Instance.new("Frame")
+    colorPreview.Name = "ColorPreview"
+    colorPreview.Size = UDim2.new(0, 25, 0, 25)
+    colorPreview.BackgroundColor3 = defaultColor
+    colorPreview.Parent = headerBtn
+    Instance.new("UICorner", colorPreview).CornerRadius = UDim.new(0, 4)
+    local previewStroke = Instance.new("UIStroke", colorPreview)
+    previewStroke.Color = CurrentTheme.StrokeDark
+    previewStroke.Thickness = 1.5
 
-    local ColorCorner = Instance.new("UICorner")
-    ColorCorner.CornerRadius = UDim.new(0, 3)
-    ColorCorner.Parent = Color
+    -- === PICKER FRAME (Popup) ===
+    local PICKER_HEIGHT = 150
+    local pickerFrame = Instance.new("Frame")
+    pickerFrame.Name = "PickerFrame"
+    pickerFrame.Size = UDim2.new(1, 0, 0, 0) -- Starts closed
+    pickerFrame.Position = UDim2.new(0, 0, 1, 5)
+    pickerFrame.BackgroundColor3 = CurrentTheme.DropdownListBG
+    pickerFrame.BorderSizePixel = 0
+    pickerFrame.ClipsDescendants = true
+    pickerFrame.Visible = false
+    pickerFrame.ZIndex = 200
+    pickerFrame.Parent = container
+    Instance.new("UICorner", pickerFrame).CornerRadius = UDim.new(0, 6)
+    Instance.new("UIStroke", pickerFrame).Color = CurrentTheme.StrokeAccent
 
-    local ColorSelection = Instance.new("ImageLabel")
-    ColorSelection.Size = UDim2.new(0, 18, 0, 18)
-    ColorSelection.AnchorPoint = Vector2.new(0.5, 0.5)
-    ColorSelection.BackgroundTransparency = 1
-    ColorSelection.Position = UDim2.new(1, 0, 0, 0)
-    ColorSelection.Image = "http://www.roblox.com/asset/?id=4805639000"
-    ColorSelection.Visible = false
-    ColorSelection.Parent = Color
+    local pickerPadding = Instance.new("UIPadding", pickerFrame)
+    pickerPadding.PaddingTop = UDim.new(0, 5)
+    pickerPadding.PaddingBottom = UDim.new(0, 5)
+    pickerPadding.PaddingLeft = UDim.new(0, 5)
+    pickerPadding.PaddingRight = UDim.new(0, 5)
 
-    -- Hue bar
-    local Hue = Instance.new("ImageLabel")
-    Hue.Size = UDim2.new(0, 25, 0, 80)
-    Hue.Position = UDim2.new(0, 229, 0, 46)
-    Hue.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Hue.Parent = Frame
+    -- Saturation/Value Box
+    local svBox = Instance.new("ImageLabel")
+    svBox.Name = "SVBox"
+    svBox.Size = UDim2.new(1, -30, 1, 0)
+    svBox.Position = UDim2.new(0, 0, 0, 0)
+    svBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
+    svBox.Image = "rbxassetid://4155801252" -- Black to white gradient
+    svBox.ZIndex = 201
+    svBox.Parent = pickerFrame
+    Instance.new("UICorner", svBox).CornerRadius = UDim.new(0, 4)
 
-    local HueCorner = Instance.new("UICorner")
-    HueCorner.CornerRadius = UDim.new(0, 3)
-    HueCorner.Parent = Hue
+    local svSelector = Instance.new("ImageLabel")
+    svSelector.Name = "SVSelector"
+    svSelector.Size = UDim2.new(0, 12, 0, 12)
+    svSelector.AnchorPoint = Vector2.new(0.5, 0.5)
+    svSelector.BackgroundTransparency = 1
+    svSelector.Image = "rbxassetid://4805639000" -- Selection circle
+    svSelector.ScaleType = Enum.ScaleType.Fit
+    svSelector.ZIndex = 202
+    svSelector.Parent = svBox
 
-    local HueGradient = Instance.new("UIGradient")
-    HueGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,4)),
-        ColorSequenceKeypoint.new(0.2, Color3.fromRGB(234,255,0)),
-        ColorSequenceKeypoint.new(0.4, Color3.fromRGB(21,255,0)),
-        ColorSequenceKeypoint.new(0.6, Color3.fromRGB(0,255,255)),
-        ColorSequenceKeypoint.new(0.8, Color3.fromRGB(0,17,255)),
-        ColorSequenceKeypoint.new(0.9, Color3.fromRGB(255,0,251)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,4))
-    }
-    HueGradient.Rotation = 270
-    HueGradient.Parent = Hue
+    -- Hue Slider
+    local hueSlider = Instance.new("Frame")
+    hueSlider.Name = "HueSlider"
+    hueSlider.Size = UDim2.new(0, 20, 1, 0)
+    hueSlider.Position = UDim2.new(1, -20, 0, 0)
+    hueSlider.BackgroundColor3 = Color3.new(1, 1, 1)
+    hueSlider.ZIndex = 201
+    hueSlider.Parent = pickerFrame
+    Instance.new("UICorner", hueSlider).CornerRadius = UDim.new(0, 4)
 
-    local HueSelection = Instance.new("ImageLabel")
-    HueSelection.Size = UDim2.new(0, 18, 0, 18)
-    HueSelection.AnchorPoint = Vector2.new(0.5,0.5)
-    HueSelection.BackgroundTransparency = 1
-    HueSelection.Image = "http://www.roblox.com/asset/?id=4805639000"
-    HueSelection.Visible = false
-    HueSelection.Position = UDim2.new(0.48, 0, 1 - select(1, Color3.toHSV(preset)))
-    HueSelection.Parent = Hue
+    local hueGradient = Instance.new("UIGradient")
+    hueGradient.Rotation = 90
+    hueGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)),
+        ColorSequenceKeypoint.new(1/6, Color3.fromRGB(255, 255, 0)),
+        ColorSequenceKeypoint.new(2/6, Color3.fromRGB(0, 255, 0)),
+        ColorSequenceKeypoint.new(3/6, Color3.fromRGB(0, 255, 255)),
+        ColorSequenceKeypoint.new(4/6, Color3.fromRGB(0, 0, 255)),
+        ColorSequenceKeypoint.new(5/6, Color3.fromRGB(255, 0, 255)),
+        ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 0))
+    })
+    hueGradient.Parent = hueSlider
 
-    -- Toggle rainbow
-    local Toggle = Instance.new("TextButton")
-    Toggle.Text = "Rainbow"
-    Toggle.Font = Enum.Font.Gotham
-    Toggle.TextSize = 15
-    Toggle.TextColor3 = Color3.fromRGB(255,255,255)
-    Toggle.BackgroundTransparency = 1
-    Toggle.Position = UDim2.new(1, 0, 0, 0)
-    Toggle.Size = UDim2.new(0, 137, 0, 38)
-    Toggle.Parent = Frame
+    local hueSelector = Instance.new("Frame")
+    hueSelector.Name = "HueSelector"
+    hueSelector.Size = UDim2.new(1, 4, 0, 4)
+    hueSelector.Position = UDim2.new(0, -2, 0, -2)
+    hueSelector.AnchorPoint = Vector2.new(0, 0.5)
+    hueSelector.BackgroundColor3 = Color3.new(1, 1, 1)
+    hueSelector.BorderSizePixel = 0
+    hueSelector.ZIndex = 202
+    hueSelector.Parent = hueSlider
+    Instance.new("UICorner", hueSelector).CornerRadius = UDim.new(0, 2)
+    Instance.new("UIStroke", hueSelector).Color = Color3.new(0,0,0)
 
-    local ToggleFrame = Instance.new("Frame")
-    ToggleFrame.Size = UDim2.new(0, 27, 0, 11)
-    ToggleFrame.Position = UDim2.new(0.6, 0, 0.35, 0)
-    ToggleFrame.BackgroundColor3 = Color3.fromRGB(226,227,227)
-    ToggleFrame.Parent = Toggle
+    -- === FUNCTIONS ===
+    local function updateVisualsFromHSV()
+        local resultColor = Color3.fromHSV(h, s, v)
+        colorPreview.BackgroundColor3 = resultColor
+        svBox.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
 
-    local ToggleFrameCorner = Instance.new("UICorner")
-    ToggleFrameCorner.CornerRadius = UDim.new(0,5)
-    ToggleFrameCorner.Parent = ToggleFrame
+        -- Update selector positions
+        svSelector.Position = UDim2.new(s, 0, 1 - v, 0)
+        hueSelector.Position = UDim2.new(0, -2, h, -2)
 
-    local ToggleCircle = Instance.new("Frame")
-    ToggleCircle.Size = UDim2.new(0,17,0,17)
-    ToggleCircle.BackgroundColor3 = Color3.fromRGB(255,255,255)
-    ToggleCircle.Position = UDim2.new(0,0,-0.27,0)
-    ToggleCircle.Parent = ToggleFrame
-
-    local ToggleCircleCorner = Instance.new("UICorner")
-    ToggleCircleCorner.CornerRadius = UDim.new(1,8)
-    ToggleCircleCorner.Parent = ToggleCircle
-
-    -- Update function
-    local function UpdateColor()
-        BoxColor.BackgroundColor3 = Color3.fromHSV(ColorH, ColorS, ColorV)
-        Color.BackgroundColor3 = Color3.fromHSV(ColorH,1,1)
-        pcall(callback, BoxColor.BackgroundColor3)
+        pcall(callback, resultColor)
     end
 
-    -- Mouse input
-    Color.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            if ColorInput then ColorInput:Disconnect() end
-            ColorInput = RunService.RenderStepped:Connect(function()
-                local mx,my = Mouse.X, Mouse.Y
-                local x = math.clamp(mx - Color.AbsolutePosition.X,0,Color.AbsoluteSize.X)/Color.AbsoluteSize.X
-                local y = math.clamp(my - Color.AbsolutePosition.Y,0,Color.AbsoluteSize.Y)/Color.AbsoluteSize.Y
-                ColorSelection.Position = UDim2.new(x,0,y,0)
-                ColorS = x
-                ColorV = 1-y
-                UpdateColor()
-            end)
-        end
-    end)
-    Color.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 and ColorInput then
-            ColorInput:Disconnect()
-        end
-    end)
-
-    Hue.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            if HueInput then HueInput:Disconnect() end
-            HueInput = RunService.RenderStepped:Connect(function()
-                local y = math.clamp(Mouse.Y - Hue.AbsolutePosition.Y,0,Hue.AbsoluteSize.Y)/Hue.AbsoluteSize.Y
-                HueSelection.Position = UDim2.new(0.48,0,y,0)
-                ColorH = 1-y
-                UpdateColor()
-            end)
-        end
-    end)
-    Hue.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 and HueInput then
-            HueInput:Disconnect()
-        end
-    end)
-
-    -- Toggle rainbow
-    Toggle.MouseButton1Click:Connect(function()
-        RainbowColorPicker = not RainbowColorPicker
-        if RainbowColorPicker then
-            OldToggleColor = BoxColor.BackgroundColor3
-            OldColor = Color.BackgroundColor3
-            OldColorSelectionPosition = ColorSelection.Position
-            OldHueSelectionPosition = HueSelection.Position
-            spawn(function()
-                while RainbowColorPicker do
-                    local hue = tick()%5/5
-                    BoxColor.BackgroundColor3 = Color3.fromHSV(hue,1,1)
-                    Color.BackgroundColor3 = Color3.fromHSV(hue,1,1)
-                    ColorSelection.Position = UDim2.new(1,0,0,0)
-                    HueSelection.Position = UDim2.new(0.48,0,0,0)
-                    pcall(callback, BoxColor.BackgroundColor3)
-                    RunService.RenderStepped:Wait()
+    local function togglePicker(show)
+        pickerOpen = show
+        if show then
+            pickerFrame.Visible = true
+            TweenService:Create(pickerFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {Size = UDim2.new(1, 0, 0, PICKER_HEIGHT)}):Play()
+            container.Size = UDim2.new(1, 0, 0, 40 + PICKER_HEIGHT + 5)
+        else
+            local tween = TweenService:Create(pickerFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {Size = UDim2.new(1, 0, 0, 0)})
+            tween:Play()
+            tween.Completed:Connect(function()
+                if not pickerOpen then
+                    pickerFrame.Visible = false
+                    container.Size = UDim2.new(1, 0, 0, 40)
                 end
             end)
-        else
-            BoxColor.BackgroundColor3 = OldToggleColor
-            Color.BackgroundColor3 = OldColor
-            ColorSelection.Position = OldColorSelectionPosition
-            HueSelection.Position = OldHueSelectionPosition
+        end
+    end
+
+    -- Initial setup
+    updateVisualsFromHSV()
+
+    -- === CONNECTIONS ===
+    headerBtn.MouseButton1Click:Connect(function()
+        togglePicker(not pickerOpen)
+    end)
+    
+    local function handleInput(input)
+        if not dragging then return end
+
+        if dragging == "sv" then
+            local relativeX = (input.Position.X - svBox.AbsolutePosition.X) / svBox.AbsoluteSize.X
+            local relativeY = (input.Position.Y - svBox.AbsolutePosition.Y) / svBox.AbsoluteSize.Y
+            s = math.clamp(relativeX, 0, 1)
+            v = 1 - math.clamp(relativeY, 0, 1)
+        elseif dragging == "hue" then
+            local relativeY = (input.Position.Y - hueSlider.AbsolutePosition.Y) / hueSlider.AbsoluteSize.Y
+            h = math.clamp(relativeY, 0, 1)
+        end
+        updateVisualsFromHSV()
+    end
+    
+    svBox.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = "sv"
+            handleInput(input)
+        end
+    end)
+    
+    hueSlider.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = "hue"
+            handleInput(input)
+        end
+    end)
+    
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = nil
         end
     end)
 
-    ColorPickerToggled = false
-    ColorpickerBtn.MouseButton1Click:Connect(function()
-        ColorPickerToggled = not ColorPickerToggled
-        if ColorPickerToggled then
-            ColorSelection.Visible = true
-            HueSelection.Visible = true
-            Frame:TweenSize(UDim2.new(0,457,0,138),"Out","Quart",0.6,true)
-        else
-            ColorSelection.Visible = false
-            HueSelection.Visible = false
-            Frame:TweenSize(UDim2.new(0,457,0,43),"Out","Quart",0.6,true)
+    UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            handleInput(input)
         end
     end)
+
+    -- === RETURN API ===
+    return {
+        Frame = container,
+        Get = function()
+            return Color3.fromHSV(h, s, v)
+        end,
+        Set = function(newColor)
+            h, s, v = Color3.toHSV(newColor)
+            updateVisualsFromHSV()
+        end
+    }
 end
 
     -- createKeybind
