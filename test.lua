@@ -1583,7 +1583,7 @@ function TabAPI:createLine(config)
     return api
 end
 
--- createcolorpicker
+--createcolorpicker
 function TabAPI:createColorPicker(config)
     local RunService = game:GetService("RunService")
     local Players = game:GetService("Players")
