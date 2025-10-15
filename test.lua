@@ -1615,7 +1615,7 @@ function TabAPI:createColorPicker(config)
     local Frame = Instance.new("Frame")
     Frame.Name = "Colorpicker"
     Frame.Size = UDim2.new(1, 0, 0, FRAME_HEIGHT_COLLAPSED)
-    Frame.BackgroundColor3 = Color3.fromRGB(64, 68, 75)
+    Frame.BackgroundColor3 = Theme.MainBG
     Frame.ClipsDescendants = true
     Frame.Parent = parent
 
