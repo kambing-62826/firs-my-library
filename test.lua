@@ -1587,175 +1587,121 @@ end
 function TabAPI:createColorPicker(config)
     local RunService = game:GetService("RunService")
     local Players = game:GetService("Players")
-    local TweenService = game:GetService("TweenService")
     local Mouse = Players.LocalPlayer:GetMouse()
-
+    
     local text = config.Name or "Color Picker"
-    local preset = config.Default or Color3.fromRGB(255, 0, 0)
+    local preset = config.Default or Color3.fromRGB(255,0,0)
     local callback = config.Callback or function() end
     local column = config.Column
-
+    
     local ColorPickerToggled = false
-    local OldToggleColor = preset
-    local OldColor = preset
-    local OldColorSelectionPosition
-    local OldHueSelectionPosition
     local ColorH, ColorS, ColorV = Color3.toHSV(preset)
-    local RainbowColorPicker = false
     local ColorInput, HueInput
-
-    -- Assume getParent exists in the main library
+    
     local parent = getParent(self, column)
     assert(parent, "[ColorPicker] parent (column) is nil!")
-
-    local FRAME_HEIGHT_COLLAPSED = 30
-    local FRAME_HEIGHT_EXPANDED = 138
-    local COLOR_AREA_HEIGHT = 80
     
     local Frame = Instance.new("Frame")
     Frame.Name = "Colorpicker"
-    -- Menggunakan lebar 1 (100% dari parent)
-    Frame.Size = UDim2.new(1, 0, 0, FRAME_HEIGHT_COLLAPSED)
-    Frame.BackgroundColor3 = Color3.fromRGB(64, 68, 75)
+    Frame.Size = UDim2.new(1,0,0,30)
+    Frame.BackgroundColor3 = Color3.fromRGB(64,68,75)
     Frame.ClipsDescendants = true
     Frame.Parent = parent
-
+    
     local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 4)
+    Corner.CornerRadius = UDim.new(0,4)
     Corner.Parent = Frame
-
-    -- Title disesuaikan untuk mengisi tinggi frame
+    
     local Title = Instance.new("TextLabel")
     Title.Name = "Title"
     Title.Text = text
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextColor3 = Color3.fromRGB(255,255,255)
     Title.TextTransparency = 0.3
     Title.Font = Enum.Font.Gotham
     Title.TextSize = 15
-    Title.Size = UDim2.new(0.6, 0, 1, 0) -- Lebar 60%, tinggi 100%
-    Title.Position = UDim2.new(0.05, 0, 0, 0) -- Margin 5% dari kiri
+    Title.Size = UDim2.new(0.5,0,1,0)
+    Title.Position = UDim2.new(0.02,0,0,0)
     Title.BackgroundTransparency = 1
     Title.TextXAlignment = Enum.TextXAlignment.Left
-    Title.TextYAlignment = Enum.TextYAlignment.Center -- Perbaikan: Teks di tengah vertikal
     Title.Parent = Frame
-
-    -- Tombol untuk expand/collapse, ukurannya 100% dari Frame
+    
     local ColorpickerBtn = Instance.new("TextButton")
     ColorpickerBtn.Name = "ColorpickerBtn"
-    ColorpickerBtn.Size = UDim2.new(1, 0, 1, 0) -- Lebar dan tinggi 100%
-    ColorpickerBtn.Position = UDim2.new(0, 0, 0, 0)
+    ColorpickerBtn.Size = UDim2.new(1,0,1,0)
     ColorpickerBtn.BackgroundTransparency = 1
     ColorpickerBtn.Text = ""
     ColorpickerBtn.Parent = Frame
-
-    -- Box warna yang ditampilkan di header
+    
     local BoxColor = Instance.new("Frame")
     BoxColor.Name = "BoxColor"
-    BoxColor.Size = UDim2.new(0, 30, 0, 18) -- Ukuran lebih kecil/bersih
-    BoxColor.AnchorPoint = Vector2.new(1, 0.5) -- AnchorPoint ke kanan-tengah
-    BoxColor.Position = UDim2.new(1, -5, 0.5, 0) -- Posisi 5px dari kanan, di tengah
+    BoxColor.Size = UDim2.new(0, 35, 0, 19)
     BoxColor.BackgroundColor3 = preset
     BoxColor.Parent = Frame
     local BoxColorCorner = Instance.new("UICorner")
-    BoxColorCorner.CornerRadius = UDim.new(0, 4)
+    BoxColorCorner.CornerRadius = UDim.new(0,4)
     BoxColorCorner.Parent = BoxColor
-
-    -- Panel Saturation/Value
+    
     local Color = Instance.new("ImageLabel")
     Color.Name = "Color"
-    Color.Size = UDim2.new(0.8, -10, 0, COLOR_AREA_HEIGHT) -- Lebar relatif, tinggi tetap
-    Color.Position = UDim2.new(0.05, 0, 0, 46) -- 5% margin kiri, 46px di bawah header (30px header + 16px margin)
     Color.Image = "rbxassetid://4155801252"
-    Color.BackgroundColor3 = Color3.fromHSV(ColorH, 1, 1) -- Perbaikan: Inisialisasi dengan Hue murni
+    Color.BackgroundColor3 = preset
     Color.Parent = Frame
     local ColorCorner = Instance.new("UICorner")
-    ColorCorner.CornerRadius = UDim.new(0, 3)
+    ColorCorner.CornerRadius = UDim.new(0,3)
     ColorCorner.Parent = Color
-
+    
     local ColorSelection = Instance.new("ImageLabel")
     ColorSelection.Name = "ColorSelection"
-    ColorSelection.Size = UDim2.new(0, 18, 0, 18)
-    ColorSelection.AnchorPoint = Vector2.new(0.5, 0.5)
+    ColorSelection.Size = UDim2.new(0,18,0,18)
+    ColorSelection.AnchorPoint = Vector2.new(0.5,0.5)
     ColorSelection.BackgroundTransparency = 1
-    ColorSelection.Position = UDim2.new(ColorS, 0, 1-ColorV, 0)
     ColorSelection.Image = "http://www.roblox.com/asset/?id=4805639000"
     ColorSelection.Visible = false
     ColorSelection.Parent = Color
-
-    -- Hue Slider
+    
     local Hue = Instance.new("ImageLabel")
     Hue.Name = "Hue"
-    Hue.Size = UDim2.new(0.15, -10, 0, COLOR_AREA_HEIGHT) -- Lebar relatif lebih kecil
-    Hue.AnchorPoint = Vector2.new(1, 0) -- AnchorPoint ke kanan-atas
-    Hue.Position = UDim2.new(0.95, 0, 0, 46) -- 5% margin kanan, 46px di bawah header
-    Hue.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Hue.BackgroundColor3 = Color3.fromRGB(255,255,255)
     Hue.Parent = Frame
     local HueCorner = Instance.new("UICorner")
-    HueCorner.CornerRadius = UDim.new(0, 3)
+    HueCorner.CornerRadius = UDim.new(0,3)
     HueCorner.Parent = Hue
-
-    local HueGradient = Instance.new("UIGradient")
-    HueGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,4)),
-        ColorSequenceKeypoint.new(0.2, Color3.fromRGB(234,255,0)),
-        ColorSequenceKeypoint.new(0.4, Color3.fromRGB(21,255,0)),
-        ColorSequenceKeypoint.new(0.6, Color3.fromRGB(0,255,255)),
-        ColorSequenceKeypoint.new(0.8, Color3.fromRGB(0,17,255)),
-        ColorSequenceKeypoint.new(0.9, Color3.fromRGB(255,0,251)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,4))
-    }
-    HueGradient.Rotation = 270
-    HueGradient.Parent = Hue
-
+    
     local HueSelection = Instance.new("ImageLabel")
     HueSelection.Name = "HueSelection"
-    HueSelection.Size = UDim2.new(0, 18, 0, 18)
+    HueSelection.Size = UDim2.new(0,18,0,18)
     HueSelection.AnchorPoint = Vector2.new(0.5,0.5)
     HueSelection.BackgroundTransparency = 1
-    HueSelection.Position = UDim2.new(0.48,0,1-ColorH,0)
     HueSelection.Image = "http://www.roblox.com/asset/?id=4805639000"
     HueSelection.Visible = false
     HueSelection.Parent = Hue
-
-    -- Toggle rainbow (Disederhanakan dan diposisikan di header)
-    -- Menghapus ToggleFrame dan ToggleCircle yang kompleks
-    local Toggle = Instance.new("TextButton")
-    Toggle.Name = "RainbowToggle"
-    Toggle.Text = "RAINBOW"
-    Toggle.Font = Enum.Font.Gotham
-    Toggle.TextSize = 13
-    Toggle.BackgroundTransparency = 1
-    Toggle.TextXAlignment = Enum.TextXAlignment.Right
-    Toggle.TextYAlignment = Enum.TextYAlignment.Center -- Added
-    Toggle.Size = UDim2.new(0.3, 0, 1, 0)
-    Toggle.Position = UDim2.new(0.65, -35, 0, 0) -- Diposisikan di sebelah kiri BoxColor
-    Toggle.Parent = Frame
     
-    local function UpdateToggleState()
-        if RainbowColorPicker then
-            Toggle.TextColor3 = Color3.fromRGB(255, 0, 0) -- Merah untuk ON/Aktif
-            Toggle.TextTransparency = 0
-        else
-            Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Toggle.TextTransparency = 0.4 -- Pudar untuk OFF/Tidak Aktif
-        end
+    -- Fungsi untuk update layout menyesuaikan parent
+    local function UpdateLayout()
+        local parentSize = Frame.AbsoluteSize
+        -- BoxColor di bawah title
+        BoxColor.Size = UDim2.new(0, 35, 0, 19)
+        BoxColor.Position = UDim2.new(0.7,0,0.5,0)
+        
+        -- Color dan Hue menyesuaikan lebar frame
+        local colorWidth = parentSize.X * 0.7
+        local colorHeight = parentSize.Y * 0.5
+        Color.Size = UDim2.new(0, colorWidth, 0, colorHeight)
+        Color.Position = UDim2.new(0.02,0,0.4,0)
+        
+        Hue.Size = UDim2.new(0, 25, 0, colorHeight)
+        Hue.Position = UDim2.new(0, colorWidth + 10, 0.4,0)
+        
+        -- Posisi seleksi
+        ColorSelection.Position = UDim2.new(ColorS,0,1-ColorV,0)
+        HueSelection.Position = UDim2.new(0.48,0,1-ColorH,0)
     end
     
-    UpdateToggleState() -- Inisialisasi status
-
-    -- Update function
-    local function UpdateColor()
-        BoxColor.BackgroundColor3 = Color3.fromHSV(ColorH, ColorS, ColorV)
-        Color.BackgroundColor3 = Color3.fromHSV(ColorH, 1, 1) -- Mengubah latar belakang warna panel
-        pcall(callback, BoxColor.BackgroundColor3)
-    end
+    Frame:GetPropertyChangedSignal("AbsoluteSize"):Connect(UpdateLayout)
+    UpdateLayout()
     
-    -- Inisialisasi warna saat pertama kali
-    UpdateColor()
-
-    -- Color selection input (Logika tetap sama)
+    -- Input handling
     Color.InputBegan:Connect(function(input)
-        if not ColorPickerToggled or RainbowColorPicker then return end -- Hanya aktif saat expand dan Rainbow OFF
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             if ColorInput then ColorInput:Disconnect() end
             ColorInput = RunService.RenderStepped:Connect(function()
@@ -1764,7 +1710,9 @@ function TabAPI:createColorPicker(config)
                 ColorSelection.Position = UDim2.new(x,0,y,0)
                 ColorS = x
                 ColorV = 1-y
-                UpdateColor()
+                BoxColor.BackgroundColor3 = Color3.fromHSV(ColorH,ColorS,ColorV)
+                Color.BackgroundColor3 = Color3.fromHSV(ColorH,1,1)
+                pcall(callback, BoxColor.BackgroundColor3)
             end)
         end
     end)
@@ -1773,17 +1721,17 @@ function TabAPI:createColorPicker(config)
             ColorInput:Disconnect()
         end
     end)
-
-    -- Hue input (Logika tetap sama)
+    
     Hue.InputBegan:Connect(function(input)
-        if not ColorPickerToggled or RainbowColorPicker then return end -- Hanya aktif saat expand dan Rainbow OFF
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             if HueInput then HueInput:Disconnect() end
             HueInput = RunService.RenderStepped:Connect(function()
                 local y = math.clamp(Mouse.Y - Hue.AbsolutePosition.Y,0,Hue.AbsoluteSize.Y)/Hue.AbsoluteSize.Y
                 HueSelection.Position = UDim2.new(0.48,0,y,0)
                 ColorH = 1-y
-                UpdateColor()
+                BoxColor.BackgroundColor3 = Color3.fromHSV(ColorH,ColorS,ColorV)
+                Color.BackgroundColor3 = Color3.fromHSV(ColorH,1,1)
+                pcall(callback, BoxColor.BackgroundColor3)
             end)
         end
     end)
@@ -1792,59 +1740,18 @@ function TabAPI:createColorPicker(config)
             HueInput:Disconnect()
         end
     end)
-
-    -- Toggle rainbow
-    Toggle.MouseButton1Click:Connect(function()
-        RainbowColorPicker = not RainbowColorPicker
-        UpdateToggleState() -- Memperbarui status tombol
-        
-        if RainbowColorPicker then
-            OldToggleColor = BoxColor.BackgroundColor3
-            OldColor = Color.BackgroundColor3
-            OldColorSelectionPosition = ColorSelection.Position
-            OldHueSelectionPosition = HueSelection.Position
-            
-            spawn(function()
-                while RainbowColorPicker do
-                    local hue = tick()%5/5
-                    BoxColor.BackgroundColor3 = Color3.fromHSV(hue,1,1)
-                    Color.BackgroundColor3 = Color3.fromHSV(hue,1,1)
-                    -- Posisi selektor dipaksa ke pojok untuk visual
-                    ColorSelection.Position = UDim2.new(1,0,0,0)
-                    HueSelection.Position = UDim2.new(0.48,0,0,0)
-                    pcall(callback, BoxColor.BackgroundColor3)
-                    RunService.RenderStepped:Wait()
-                end
-            end)
-        else
-            -- Kembalikan warna dan posisi seleksi
-            BoxColor.BackgroundColor3 = OldToggleColor
-            Color.BackgroundColor3 = OldColor
-            ColorSelection.Position = OldColorSelectionPosition
-            HueSelection.Position = OldHueSelectionPosition
-            
-            -- Perbarui ColorH, ColorS, ColorV setelah keluar dari rainbow
-            ColorH, ColorS, ColorV = Color3.toHSV(OldToggleColor)
-            
-            -- Pastikan selektor berada di posisi yang benar setelah dikembalikan
-            ColorSelection.Position = OldColorSelectionPosition
-            HueSelection.Position = OldHueSelectionPosition
-        end
-    end)
-
+    
     -- Expand/collapse
     ColorpickerBtn.MouseButton1Click:Connect(function()
         ColorPickerToggled = not ColorPickerToggled
         if ColorPickerToggled then
             ColorSelection.Visible = true
             HueSelection.Visible = true
-            -- Menggunakan lebar 1 (100%) dan ketinggian expanded
-            Frame:TweenSize(UDim2.new(1, 0, 0, FRAME_HEIGHT_EXPANDED),"Out","Quart",0.2,true)
+            Frame.Size = UDim2.new(1,0,0, Frame.AbsoluteSize.Y + 150)
         else
             ColorSelection.Visible = false
             HueSelection.Visible = false
-            -- Menggunakan lebar 1 (100%) dan ketinggian collapsed
-            Frame:TweenSize(UDim2.new(1, 0, 0, FRAME_HEIGHT_COLLAPSED),"Out","Quart",0.2,true)
+            Frame.Size = UDim2.new(1,0,0,30)
         end
     end)
 end
