@@ -1462,6 +1462,51 @@ function TabAPI:createTextbox(config)
     return api
 end
 
+-- createLabel
+function TabAPI:createLabel(config)
+    local text = config.Text or "Label"
+    local textSize = config.TextSize or 14
+    local column = config.Column
+    local parent = getParent(self, column)
+
+    --== Container ==--
+    local container = Instance.new("Frame")
+    container.BackgroundTransparency = 1
+    container.Size = UDim2.new(1, 0, 0, 0)
+    container.Parent = parent
+
+    --== Text ==--
+    local label = Instance.new("TextLabel")
+    label.BackgroundTransparency = 1
+    label.Size = UDim2.new(1, -10, 0, 0)
+    label.Position = UDim2.new(0, 5, 0, 0)
+    label.Font = Enum.Font.Gotham
+    label.TextColor3 = CurrentTheme.TextColor or Color3.fromRGB(255, 255, 255)
+    label.TextSize = textSize
+    label.TextWrapped = true
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.TextYAlignment = Enum.TextYAlignment.Top
+    label.Text = text
+    label.AutomaticSize = Enum.AutomaticSize.Y
+    label.Parent = container
+
+    --== Auto height ==--
+    container.AutomaticSize = Enum.AutomaticSize.Y
+
+    --== Return API ==--
+    local api = {}
+    function api:SetText(newText)
+        label.Text = newText
+    end
+    function api:GetText()
+        return label.Text
+    end
+    function api:SetColor(color)
+        label.TextColor3 = color
+    end
+    return api
+end
+
     -- createKeybind
     function TabAPI:createKeybind(config)
         local name = config.Name or "Keybind"
