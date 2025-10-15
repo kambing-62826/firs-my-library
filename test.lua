@@ -1853,6 +1853,79 @@ BoxColorCorner.Parent = BoxColor
         end
     end)
 
+ local UserInputService = game:GetService("UserInputService")
+
+    local function UpdateColorFromInput(x, y)
+        local relativeX = math.clamp((x - Color.AbsolutePosition.X) / Color.AbsoluteSize.X, 0, 1)
+        local relativeY = math.clamp((y - Color.AbsolutePosition.Y) / Color.AbsoluteSize.Y, 0, 1)
+        ColorS = relativeX
+        ColorV = 1 - relativeY
+        local newColor = Color3.fromHSV(ColorH, ColorS, ColorV)
+        BoxColor.BackgroundColor3 = newColor
+        ColorSelection.Position = UDim2.new(relativeX, 0, 1 - relativeY, 0)
+        pcall(callback, newColor)
+    end
+
+    local function UpdateHueFromInput(y)
+        local relativeY = math.clamp((y - Hue.AbsolutePosition.Y) / Hue.AbsoluteSize.Y, 0, 1)
+        ColorH = 1 - relativeY
+        local newHueColor = Color3.fromHSV(ColorH, 1, 1)
+        HueSelection.Position = UDim2.new(0.48, 0, 1 - relativeY, 0)
+        Color.BackgroundColor3 = newHueColor
+        local newColor = Color3.fromHSV(ColorH, ColorS, ColorV)
+        BoxColor.BackgroundColor3 = newColor
+        pcall(callback, newColor)
+    end
+
+    -- Event handlers
+    local draggingColor = false
+    local draggingHue = false
+
+    local function StartColorDrag(input)
+        draggingColor = true
+        UpdateColorFromInput(input.Position.X, input.Position.Y)
+    end
+
+    local function StartHueDrag(input)
+        draggingHue = true
+        UpdateHueFromInput(input.Position.Y)
+    end
+
+    local function StopDrag()
+        draggingColor = false
+        draggingHue = false
+    end
+
+    -- Mouse and touch handling
+    Color.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or
+           input.UserInputType == Enum.UserInputType.Touch then
+            StartColorDrag(input)
+        end
+    end)
+
+    Hue.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or
+           input.UserInputType == Enum.UserInputType.Touch then
+            StartHueDrag(input)
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if draggingColor and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            UpdateColorFromInput(input.Position.X, input.Position.Y)
+        elseif draggingHue and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            UpdateHueFromInput(input.Position.Y)
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or
+           input.UserInputType == Enum.UserInputType.Touch then
+            StopDrag()
+        end
+    end)
+
     -- Expand/collapse
     ColorpickerBtn.MouseButton1Click:Connect(function()
         ColorPickerToggled = not ColorPickerToggled
