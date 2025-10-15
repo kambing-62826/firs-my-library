@@ -1648,17 +1648,49 @@ function TabAPI:createColorPicker(config)
     ColorpickerBtn.Text = ""
     ColorpickerBtn.Parent = Frame
 
-    -- Box warna yang ditampilkan di header
-    local BoxColor = Instance.new("Frame")
-    BoxColor.Name = "BoxColor"
-    BoxColor.Size = UDim2.new(0, 30, 0, 18) -- Ukuran lebih kecil/bersih
-    BoxColor.AnchorPoint = Vector2.new(1, 0.5) -- AnchorPoint ke kanan-tengah
-    BoxColor.Position = UDim2.new(1, -5, 0.5, 0) -- Posisi 5px dari kanan, di tengah
-    BoxColor.BackgroundColor3 = preset
-    BoxColor.Parent = Frame
-    local BoxColorCorner = Instance.new("UICorner")
-    BoxColorCorner.CornerRadius = UDim.new(0, 4)
-    BoxColorCorner.Parent = BoxColor
+-- Header container agar BoxColor tidak ikut turun
+local Header = Instance.new("Frame")
+Header.Name = "Header"
+Header.Size = UDim2.new(1, 0, 0, FRAME_HEIGHT_COLLAPSED)
+Header.BackgroundTransparency = 1
+Header.Parent = Frame
+
+-- Title di dalam header
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Text = text
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextTransparency = 0.3
+Title.Font = Enum.Font.Gotham
+Title.TextSize = 15
+Title.Size = UDim2.new(0.6, 0, 1, 0)
+Title.Position = UDim2.new(0.05, 0, 0, 0)
+Title.BackgroundTransparency = 1
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.TextYAlignment = Enum.TextYAlignment.Center
+Title.Parent = Header
+
+-- Tombol expand/collapse (klik area)
+local ColorpickerBtn = Instance.new("TextButton")
+ColorpickerBtn.Name = "ColorpickerBtn"
+ColorpickerBtn.Size = UDim2.new(1, 0, 1, 0)
+ColorpickerBtn.Position = UDim2.new(0, 0, 0, 0)
+ColorpickerBtn.BackgroundTransparency = 1
+ColorpickerBtn.Text = ""
+ColorpickerBtn.Parent = Header
+
+-- Box warna tetap di header, tidak ikut turun
+local BoxColor = Instance.new("Frame")
+BoxColor.Name = "BoxColor"
+BoxColor.Size = UDim2.new(0, 30, 0, 18)
+BoxColor.AnchorPoint = Vector2.new(1, 0.5)
+BoxColor.Position = UDim2.new(1, -5, 0.5, 0)
+BoxColor.BackgroundColor3 = preset
+BoxColor.Parent = Header
+
+local BoxColorCorner = Instance.new("UICorner")
+BoxColorCorner.CornerRadius = UDim.new(0, 4)
+BoxColorCorner.Parent = BoxColor
 
     -- Panel Saturation/Value
     local Color = Instance.new("ImageLabel")
