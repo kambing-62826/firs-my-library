@@ -1711,7 +1711,7 @@ function TabAPI:createColorPicker(config)
     HueSelection.Size = UDim2.new(0, 18, 0, 18)
     HueSelection.AnchorPoint = Vector2.new(0.5, 0.5)
     HueSelection.BackgroundTransparency = 1
-    HueSelection.Position = UDim2.new(0.48, 0, 1 - ColorH, 0)
+    HueSelection.Position = UDim2.new(0.48, 0, ColorH, 0)
     HueSelection.Image = "http://www.roblox.com/asset/?id=4805639000"
     HueSelection.Visible = false
     HueSelection.Parent = Hue
@@ -1809,8 +1809,8 @@ function TabAPI:createColorPicker(config)
 
     local function UpdateHueFromInput(y)
         local ry = math.clamp((y - Hue.AbsolutePosition.Y) / Hue.AbsoluteSize.Y, 0, 1)
-        ColorH = 1 - ry
-        HueSelection.Position = UDim2.new(0.48, 0, 1 - ry, 0)
+        ColorH = ry
+        HueSelection.Position = UDim2.new(0.48, 0, ry, 0)
         local newColor = Color3.fromHSV(ColorH, ColorS, ColorV)
         Color.BackgroundColor3 = Color3.fromHSV(ColorH, 1, 1)
         BoxColor.BackgroundColor3 = newColor
