@@ -1609,7 +1609,7 @@ function TabAPI:createColorPicker(config)
     assert(parent, "[ColorPicker] parent (column) is nil!")
 
     local FRAME_HEIGHT_COLLAPSED = 30
-    local FRAME_HEIGHT_EXPANDED = 170
+    local FRAME_HEIGHT_EXPANDED = 175
     local COLOR_AREA_HEIGHT = 80
     
     local Frame = Instance.new("Frame")
@@ -1717,125 +1717,107 @@ function TabAPI:createColorPicker(config)
     HueSelection.Visible = false
     HueSelection.Parent = Hue
 
-    -- === Rainbow Toggle (dipindahkan ke bawah Color & Hue) ===
-    local Toggle = Instance.new("TextButton")
-    Toggle.Name = "RainbowToggle"
-    Toggle.Text = "RAINBOW"
-    Toggle.Font = Enum.Font.Gotham
-    Toggle.TextSize = 13
-    Toggle.BackgroundTransparency = 0
-    Toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Toggle.TextTransparency = 0.4
-    Toggle.AutoButtonColor = false
-    Toggle.Size = UDim2.new(0.9, 0, 0, 22)
-    Toggle.Position = UDim2.new(0.05, 0, 0, 46 + COLOR_AREA_HEIGHT + 8) -- di bawah color picker area
-    Toggle.Parent = Frame
+    -- === Rainbow Toggle (modern switch style, di bawah color picker) ===
+    local ToggleFrame = Instance.new("Frame")
+    ToggleFrame.Name = "RainbowToggleFrame"
+    ToggleFrame.Size = UDim2.new(0.9, 0, 0, 22)
+    ToggleFrame.Position = UDim2.new(0.05, 0, 0, 46 + COLOR_AREA_HEIGHT + 10)
+    ToggleFrame.BackgroundTransparency = 1
+    ToggleFrame.Parent = Frame
 
-    local ToggleCorner = Instance.new("UICorner")
-    ToggleCorner.CornerRadius = UDim.new(0, 4)
-    ToggleCorner.Parent = Toggle
+    -- Label teks "Rainbow"
+    local ToggleLabel = Instance.new("TextLabel")
+    ToggleLabel.Name = "Label"
+    ToggleLabel.Size = UDim2.new(0.7, 0, 1, 0)
+    ToggleLabel.Position = UDim2.new(0, 0, 0, 0)
+    ToggleLabel.BackgroundTransparency = 1
+    ToggleLabel.Font = Enum.Font.Gotham
+    ToggleLabel.Text = "Rainbow"
+    ToggleLabel.TextSize = 14
+    ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleLabel.TextTransparency = 0.3
+    ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    ToggleLabel.Parent = ToggleFrame
 
-    local function UpdateToggleState()
+    -- Tombol utama (switch area)
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Name = "ToggleButton"
+    ToggleButton.Size = UDim2.new(0.3, 0, 1, 0)
+    ToggleButton.Position = UDim2.new(0.7, 0, 0, 0)
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    ToggleButton.Text = ""
+    ToggleButton.AutoButtonColor = false
+    ToggleButton.Parent = ToggleFrame
+
+    local ToggleButtonCorner = Instance.new("UICorner")
+    ToggleButtonCorner.CornerRadius = UDim.new(1, 0)
+    ToggleButtonCorner.Parent = ToggleButton
+
+    -- Lingkaran kecil di dalam toggle
+    local ToggleCircle = Instance.new("Frame")
+    ToggleCircle.Name = "Circle"
+    ToggleCircle.Size = UDim2.new(0, 18, 0, 18)
+    ToggleCircle.Position = UDim2.new(0, 2, 0.5, -9)
+    ToggleCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleCircle.Parent = ToggleButton
+
+    local CircleCorner = Instance.new("UICorner")
+    CircleCorner.CornerRadius = UDim.new(1, 0)
+    CircleCorner.Parent = ToggleCircle
+
+    -- Animasi toggle (modern style)
+    local function UpdateToggleState(animated)
         if RainbowColorPicker then
-            Toggle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-            Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Toggle.TextTransparency = 0
+            -- Aktif: warna merah, circle geser kanan
+            TweenService:Create(ToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+            }):Play()
+            TweenService:Create(ToggleCircle, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Position = UDim2.new(1, -20, 0.5, -9)
+            }):Play()
+            ToggleLabel.TextTransparency = 0
         else
-            Toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Toggle.TextTransparency = 0.4
+            -- Mati: warna abu, circle geser kiri
+            TweenService:Create(ToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            }):Play()
+            TweenService:Create(ToggleCircle, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Position = UDim2.new(0, 2, 0.5, -9)
+            }):Play()
+            ToggleLabel.TextTransparency = 0.4
         end
     end
-    
-    UpdateToggleState() -- Inisialisasi status
 
-    -- Update function
-    local function UpdateColor()
-        BoxColor.BackgroundColor3 = Color3.fromHSV(ColorH, ColorS, ColorV)
-        Color.BackgroundColor3 = Color3.fromHSV(ColorH, 1, 1) -- Mengubah latar belakang warna panel
-        pcall(callback, BoxColor.BackgroundColor3)
-    end
-    
-    -- Inisialisasi warna saat pertama kali
-    UpdateColor()
+    UpdateToggleState(false)
 
-    -- Color selection input (Logika tetap sama)
-    Color.InputBegan:Connect(function(input)
-        if not ColorPickerToggled or RainbowColorPicker then return end -- Hanya aktif saat expand dan Rainbow OFF
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            if ColorInput then ColorInput:Disconnect() end
-            ColorInput = RunService.RenderStepped:Connect(function()
-                local x = math.clamp(Mouse.X - Color.AbsolutePosition.X,0,Color.AbsoluteSize.X)/Color.AbsoluteSize.X
-                local y = math.clamp(Mouse.Y - Color.AbsolutePosition.Y,0,Color.AbsoluteSize.Y)/Color.AbsoluteSize.Y
-                ColorSelection.Position = UDim2.new(x,0,y,0)
-                ColorS = x
-                ColorV = 1-y
-                UpdateColor()
-            end)
-        end
-    end)
-    Color.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 and ColorInput then
-            ColorInput:Disconnect()
-        end
-    end)
-
-    -- Hue input (Logika tetap sama)
-    Hue.InputBegan:Connect(function(input)
-        if not ColorPickerToggled or RainbowColorPicker then return end -- Hanya aktif saat expand dan Rainbow OFF
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            if HueInput then HueInput:Disconnect() end
-            HueInput = RunService.RenderStepped:Connect(function()
-                local y = math.clamp(Mouse.Y - Hue.AbsolutePosition.Y,0,Hue.AbsoluteSize.Y)/Hue.AbsoluteSize.Y
-                HueSelection.Position = UDim2.new(0.48,0,y,0)
-                ColorH = 1-y
-                UpdateColor()
-            end)
-        end
-    end)
-    Hue.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 and HueInput then
-            HueInput:Disconnect()
-        end
-    end)
-
-    -- Toggle rainbow
-    Toggle.MouseButton1Click:Connect(function()
+    -- Klik toggle (ubah status rainbow)
+    ToggleButton.MouseButton1Click:Connect(function()
         RainbowColorPicker = not RainbowColorPicker
-        UpdateToggleState() -- Memperbarui status tombol
-        
+        UpdateToggleState(true)
+
         if RainbowColorPicker then
             OldToggleColor = BoxColor.BackgroundColor3
             OldColor = Color.BackgroundColor3
             OldColorSelectionPosition = ColorSelection.Position
             OldHueSelectionPosition = HueSelection.Position
-            
-            spawn(function()
+
+            task.spawn(function()
                 while RainbowColorPicker do
-                    local hue = tick()%5/5
-                    BoxColor.BackgroundColor3 = Color3.fromHSV(hue,1,1)
-                    Color.BackgroundColor3 = Color3.fromHSV(hue,1,1)
-                    -- Posisi selektor dipaksa ke pojok untuk visual
-                    ColorSelection.Position = UDim2.new(1,0,0,0)
-                    HueSelection.Position = UDim2.new(0.48,0,0,0)
+                    local hue = tick() % 5 / 5
+                    BoxColor.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+                    Color.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+                    ColorSelection.Position = UDim2.new(1, 0, 0, 0)
+                    HueSelection.Position = UDim2.new(0.48, 0, 0, 0)
                     pcall(callback, BoxColor.BackgroundColor3)
                     RunService.RenderStepped:Wait()
                 end
             end)
         else
-            -- Kembalikan warna dan posisi seleksi
             BoxColor.BackgroundColor3 = OldToggleColor
             Color.BackgroundColor3 = OldColor
             ColorSelection.Position = OldColorSelectionPosition
             HueSelection.Position = OldHueSelectionPosition
-            
-            -- Perbarui ColorH, ColorS, ColorV setelah keluar dari rainbow
             ColorH, ColorS, ColorV = Color3.toHSV(OldToggleColor)
-            
-            -- Pastikan selektor berada di posisi yang benar setelah dikembalikan
-            ColorSelection.Position = OldColorSelectionPosition
-            HueSelection.Position = OldHueSelectionPosition
         end
     end)
 
